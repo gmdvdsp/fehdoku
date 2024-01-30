@@ -1,33 +1,52 @@
 // const categoryCellIndexes = [0, 1, 2, 3, 4, 8, 12];
 const searchInput = document.getElementById('searchInput');
 const searchBar = document.getElementById('searchBar');
+const dimmer = document.getElementById('dimmer');
+const guessesNumber = document.getElementById('guessesNumber');
+
+
 const searchResults = document.getElementById('searchResults');
 const gridContainer = document.getElementById('gridContainer');
+
+const categories = grid.categories;
+const targets = grid.targets;
 
 let selectedCell = null;
 let selectedCellIndex = null;
 
-// allow cells to be clicked
-document.addEventListener('DOMContentLoaded', function () {
-    let cells = document.querySelectorAll(".grid-item");
-    cells.forEach((cell, i) => {
-        cell.addEventListener("click", function () {
-            call_dropdown(i, cell);
-        });
-    })
-});
+function addDimEvent() {
+    dimmer.addEventListener('click', function () {
+        dimmer.style.opacity = '0';
+        // displayResults([]);
+    });
+}
 
-// seed the search options
-searchInput.addEventListener('input', function () {
-    const inputValue = searchInput.value.toLowerCase();
-    const options = grid['options'].filter(option =>
-        option.toLowerCase().includes(inputValue)
-    );
+function addClickableCellEvent() {
+    document.addEventListener('DOMContentLoaded', function () {
+        let cells = document.querySelectorAll(".grid-item");
+        cells.forEach((cell, i) => {
+            cell.addEventListener("click", function () {
+                showDropdown(i, cell);
+            });
+        })
+    });
+}
 
-    displayResults(options);
-});
+function addSearchEvent() {
+    searchInput.addEventListener('input', function () {
+        const inputValue = searchInput.value.toLowerCase();
+        let options = []
+        // if empty, cancel
+        if (inputValue.length === 0) {
+            options = []
+        } else {
+            options = grid['options'].filter(option =>
+                option.toLowerCase().includes(inputValue));
+        }
+        displayResults(options);
+    });
+}
 
-// when the user makes a selection in the results, check if it's right
 function evaluateCorrectness(result, i) {
     if (grid['solutions'][i].includes(result)) {
         selectedCell.style.color = 'green';
@@ -36,6 +55,7 @@ function evaluateCorrectness(result, i) {
         selectedCell.style.color = 'red';
         console.log('Incorrect')
     }
+    guessesNumber.innerText -= 1;
 }
 
 function displayResults(results) {
@@ -47,16 +67,21 @@ function displayResults(results) {
     }
 
     results.forEach(result => {
-        const resultItem = document.createElement('div');
+        const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
-        resultItem.textContent = result;
+        resultItem.innerHTML = result;
 
         resultItem.addEventListener('click', function () {
             searchInput.value = result;
             // only take the name for now
-            selectedCell.innerHTML = result.split(':')[0];
+            nameAndTitle = result.split(':')
+            selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
             evaluateCorrectness(result, selectedCellIndex);
+
             searchResults.style.display = 'none';
+            searchInput.value = null;
+            searchBar.style.opacity = '0';
+            dimmer.style.opacity = '0';
         });
 
         searchResults.appendChild(resultItem);
@@ -65,7 +90,7 @@ function displayResults(results) {
     searchResults.style.display = 'block';
 }
 
-function call_dropdown(i, cell) {
+function showDropdown(i, cell) {
     if (!selectedCell) {
         selectedCell = cell;
         selectedCellIndex = i;
@@ -73,38 +98,48 @@ function call_dropdown(i, cell) {
     if (searchBar.style.opacity === '0' || searchBar.style.opacity === '') {
         selectedCell = cell;
         searchBar.style.opacity = '1';
+        dimmer.style.opacity = '0.5';
     } else {
         selectedCell = null;
         searchBar.style.opacity = '0';
+        dimmer.style.opacity = '0';
     }
     console.log(i)
 }
 
-const categories = grid.categories;
-const targets = grid.targets;
-
+// todo: REFACTOR HOLY SH*T
 for (let i = 0; i < 16; i++) {
     const gridItem = document.createElement('div');
+    gridItem.classList.add('grid-item');
     const categoryItem = document.createElement('div');
+    categoryItem.classList.add('category-item');
+    const categoryLabel = document.createElement('div');
+    categoryLabel.classList.add('category-label');
+    const categoryValue = document.createElement('div');
+    categoryValue.classList.add('category-value');
+
+    categoryItem.appendChild(categoryLabel);
 
     // extremely evil!
     if (i === 0) {
-        categoryItem.classList.add('category-item');
         gridContainer.appendChild(categoryItem);
     } else if (i === 1 || i === 2 || i === 3 || i === 4) {
-        categoryItem.classList.add('category-item');
-        categoryItem.textContent = categories[i - 1].toUpperCase() + ':\n' + targets[i - 1];
+        categoryLabel.textContent = categories[i - 1].toUpperCase();
+        categoryValue.textContent = targets[i - 1].toUpperCase();
+        categoryLabel.appendChild(categoryValue);
         gridContainer.appendChild(categoryItem);
     } else if (i === 8) {
-        categoryItem.classList.add('category-item');
-        categoryItem.textContent = categories[4].toUpperCase() + ':\n' + targets[4];
+        categoryLabel.textContent = categories[4].toUpperCase();
+        categoryValue.textContent = targets[4].toUpperCase();
+        categoryLabel.appendChild(categoryValue);
         gridContainer.appendChild(categoryItem);
     } else if (i === 12) {
-        categoryItem.classList.add('category-item');
-        categoryItem.textContent = categories[5].toUpperCase() + ':\n' + targets[5];
+        categoryLabel.textContent = categories[5].toUpperCase();
+        categoryValue.textContent = targets[5].toUpperCase();
+        categoryLabel.appendChild(categoryValue);
         gridContainer.appendChild(categoryItem);
     } else {
-        gridItem.classList.add('grid-item');
+        categoryLabel.appendChild(categoryValue);
         gridContainer.appendChild(gridItem);
     }
 
@@ -118,3 +153,7 @@ for (let i = 0; i < 16; i++) {
         gridItem.classList.add('bottom-right');
     }
 }
+
+addDimEvent();
+addClickableCellEvent();
+addSearchEvent();

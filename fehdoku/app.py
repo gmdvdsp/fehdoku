@@ -10,9 +10,7 @@ def index():
     for key, value in grid.items():
         if isinstance(value, set):
             grid[key] = list(value)
-    # todo: crashes if Special Rarity is None in grid.targets, preprocess type None to 'None' in game.py
-    # todo: refactor to use views
-    print(len(grid['heroes']))
+    # print(len(grid['heroes']))
     return render_template('fehdoku.html', grid=grid)
 
 

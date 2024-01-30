@@ -4,26 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link rel="icon" type="image/x-icon" href="static/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="static/fehdoku.css">
     <title>fehdoku by fyneder</title>
 </head>
 <body>
-    <div id="header">
-        <div id="headerContent">
-        </div>
-    </div>
 
-    <div class="search" id="searchBar">
-        <input type="text" id="searchInput" class="searchTerm" placeholder="">
-        <div id="searchResults" class="search-results"></div>
-    </div>
 
-    <div class="grid-container" id="gridContainer">
+<div id="header">
+    <div id="headerContent">
     </div>
+</div>
 
-    <script type="text/javascript">
-        grid = {{grid|tojson}}
-    </script>
-    <script src="{{url_for('static', filename='fehdoku.js')}}"></script>
+<div class="search" id="searchBar">
+    <input type="text" id="searchInput" class="searchTerm" placeholder="">
+    <ul id="searchResults" class="search-results"></ul>
+</div>
+
+<div class="grid-container" id="gridContainer">
+    <div id="guessesText">GUESSES LEFT
+    <div id="guessesNumber">8</div>
+    </div>
+</div>
+
+<div id="dimmer"></div>
+
+<script type="text/javascript">
+    grid = {{grid|tojson}}
+</script>
+<script src="{{ url_for('static', filename='fehdoku.js') }}"></script>
 </body>
 </html>
