@@ -8,6 +8,11 @@ High:
 * Add an undo system.
 * Refactor the HTML/CSS.
 * Refactor the JS code.
+* Round the version category.
+* Change the null value of Special Rarity to the string 'None'.
+* Center the grid on only the 3x3 (probably just add the grid items directly
+  to the HTML).
+* Refactor the seeding algorithm for the grid cells.
 
 Low:
 * Fix bug that blocks cell clicking after cancelling
@@ -16,3 +21,4 @@ Low:
 * Add a logo.
 * Add a footer.
 * Add daily persistence.
+* Add tutorial mouse-overs for the categories.
