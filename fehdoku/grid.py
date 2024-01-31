@@ -2,7 +2,7 @@ import json
 import random
 import math
 
-MIN_SOLUTIONS = 5
+MIN_SOLUTIONS = 3
 STAT_THRESHOLDS = 0
 CATEGORIES = ['Rarities', 'Special Rarity', 'Weapon', 'Color', 'Move Type', 'Entries', 'Version',
               'HP', 'ATK', 'SPD', 'DEF', 'RES', 'Weapons', 'Assists', 'Specials', 'Skills']

@@ -37,9 +37,11 @@ body {
     position: relative;
     width: 100%;
     justify-content: center;
-    margin: 40px auto;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
+    /*Because each category is 150px*/
+    left: 75px;
+    top: 20px;
     z-index: 200;
 }
 
@@ -53,7 +55,6 @@ body {
 
 .result-item {
     margin: 0 0 .2em 0;
-    background-image: url('./img/favicon.ico');
     background-repeat: no-repeat;
     background-position: 0 50%;
     padding-left: 1.2em;
@@ -84,16 +85,21 @@ body {
     width: 100px;
 }
 
+#gameWrapper {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    left: 25%;
+}
+
 .grid-container {
     display: grid;
-    position: relative;
     grid-template-columns: repeat(4, 150px);
     grid-template-rows: repeat(4, 150px);
     width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
 }
 
 #guessesNumber {
@@ -103,16 +109,16 @@ body {
 }
 
 #guessesText {
+    display: flex;
+    flex-direction: column;
     color: black;
     font-family: 'Lato', sans-serif;
     text-align: center;
     font-weight: bold;
     font-size: 16px;
-    display: inline-block;
+    left: 110%;
+    top: 55%;
     position: absolute;
-    left: 100%;
-    margin-left: 60px;
-    top: 50%;
 }
 
 .category-label {
@@ -152,7 +158,7 @@ body {
     font-family: 'Lato', sans-serif;
     font-weight: bold;
     white-space: pre;
-    background: white;
+    background: white no-repeat;
 }
 
 .grid-item:hover {

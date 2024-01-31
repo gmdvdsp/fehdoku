@@ -17,7 +17,6 @@ let selectedCellIndex = null;
 function addDimEvent() {
     dimmer.addEventListener('click', function () {
         dimmer.style.opacity = '0';
-        // displayResults([]);
     });
 }
 
@@ -26,7 +25,7 @@ function addClickableCellEvent() {
         let cells = document.querySelectorAll(".grid-item");
         cells.forEach((cell, i) => {
             cell.addEventListener("click", function () {
-                showDropdown(i, cell);
+                toggleDropdown(i, cell);
             });
         })
     });
@@ -37,28 +36,37 @@ function addSearchEvent() {
         const inputValue = searchInput.value.toLowerCase();
         let options = []
         // if empty, cancel
+        let heroes = [];
         if (inputValue.length === 0) {
             options = []
         } else {
-            options = grid['options'].filter(option =>
-                option.toLowerCase().includes(inputValue));
+            grid['heroes'].filter((heroObject) => {
+                if (heroObject['name'].toLowerCase().includes(inputValue)) {
+                    heroes.push(heroObject)
+                }
+            })
+            heroes.forEach((hero) => {
+                options.push(hero['name'])
+            })
         }
-        displayResults(options);
+        displayResults(heroes, options);
     });
 }
 
-function evaluateCorrectness(result, i) {
-    if (grid['solutions'][i].includes(result)) {
+function evaluateCorrectness(hero, result) {
+    console.log(grid['solutions'][selectedCellIndex])
+    if (grid['solutions'][selectedCellIndex].includes(result)) {
         selectedCell.style.color = 'green';
         console.log('Correct')
     } else {
         selectedCell.style.color = 'red';
         console.log('Incorrect')
     }
+    // selectedCell.style.backgroundImage = "url(" + hero['image'] + ")";
     guessesNumber.innerText -= 1;
 }
 
-function displayResults(results) {
+function displayResults(heroes, results) {
     searchResults.innerHTML = '';
 
     if (results.length === 0) {
@@ -70,13 +78,22 @@ function displayResults(results) {
         const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
         resultItem.innerHTML = result;
+        let heroObject = null;
+
+        heroes.forEach(hero => {
+            // will always succeed, very nasty
+            if (hero['name'] === result) {
+                resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
+                heroObject = hero;
+            }
+        })
 
         resultItem.addEventListener('click', function () {
             searchInput.value = result;
             // only take the name for now
             nameAndTitle = result.split(':')
             selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
-            evaluateCorrectness(result, selectedCellIndex);
+            evaluateCorrectness(heroObject, result);
 
             searchResults.style.display = 'none';
             searchInput.value = null;
@@ -90,24 +107,25 @@ function displayResults(results) {
     searchResults.style.display = 'block';
 }
 
-function showDropdown(i, cell) {
-    if (!selectedCell) {
-        selectedCell = cell;
-        selectedCellIndex = i;
-    }
+function toggleDropdown(i, cell) {
+    selectedCell = cell;
+    selectedCellIndex = i;
     if (searchBar.style.opacity === '0' || searchBar.style.opacity === '') {
         selectedCell = cell;
         searchBar.style.opacity = '1';
         dimmer.style.opacity = '0.5';
     } else {
+        // click away from dropdown event is here for some reason
         selectedCell = null;
         searchBar.style.opacity = '0';
         dimmer.style.opacity = '0';
+        searchInput.value = ''
+        displayResults([])
+        // console.log('test')
     }
-    console.log(i)
 }
 
-// todo: REFACTOR HOLY SH*T
+// todo: REFACTOR HOLY
 for (let i = 0; i < 16; i++) {
     const gridItem = document.createElement('div');
     gridItem.classList.add('grid-item');

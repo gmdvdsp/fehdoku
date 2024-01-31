@@ -16,21 +16,23 @@
     </div>
 </div>
 
-<div class="search" id="searchBar">
-    <input type="text" id="searchInput" class="searchTerm" placeholder="">
-    <ul id="searchResults" class="search-results"></ul>
-</div>
+<div class="game" id="gameWrapper">
+    <div class="search" id="searchBar">
+        <input type="text" id="searchInput" class="searchTerm" placeholder="">
+        <ul id="searchResults" class="search-results"></ul>
+    </div>
 
-<div class="grid-container" id="gridContainer">
+    <div class="grid-container" id="gridContainer"></div>
+
     <div id="guessesText">GUESSES LEFT
-    <div id="guessesNumber">8</div>
+        <div id="guessesNumber">8</div>
     </div>
 </div>
 
 <div id="dimmer"></div>
 
 <script type="text/javascript">
-    grid = {{grid|tojson}}
+    grid = {{ grid|tojson }}
 </script>
 <script src="{{ url_for('static', filename='fehdoku.js') }}"></script>
 </body>
