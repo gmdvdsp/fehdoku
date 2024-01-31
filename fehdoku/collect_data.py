@@ -6,7 +6,7 @@ import os
 import re
 
 PREFIX = 'https://feheroes.fandom.com/'
-FILE_PATH = 'heroes_v1.json'
+FILE_PATH = 'heroes_v2.json'
 MAX = 1055
 
 heroes = []
@@ -27,6 +27,13 @@ def get_soup_from_page(link, debug=False):
 def format(text):
     """ Strips whitespace """
     return text.replace(u'\xa0', u' ').strip()
+
+
+def download(name, link):
+    path = f'./static/img/heroes/{name}.webp'
+    if not os.path.exists(path):
+        r = requests.get(link, allow_redirects=True)
+        open(path, 'wb').write(r.content)
 
 
 def write(contents, path=FILE_PATH, return_json=True):
@@ -173,6 +180,27 @@ def parse_skills(hero, soup):
         for a in table.find_all('a', class_=None):
             hero['Skills'].append(a.text)
 
+# todo: fix Gustav: Sovereign Slain; his picture on fandom is 'Gustav: Exsanguinator' for some reason
+def parse_image(hero, soup):
+    image_list = soup.find_all('a', href=True)
+    # print(image_list)
+    for a in image_list:
+        try:
+            if a.get('title') == hero['name']:
+                img = a.find('img')
+                name_words = img.get('alt').replace(' ', '_')
+                try:
+                    if name_words in img.get('data-src'):
+                        download(name_words, img.get('data-src'))
+                        print(img.get('data-src'))
+                except TypeError:
+                    if name_words in img.get('src'):
+                        download(name_words, img.get('src'))
+                        print(img.get('src'))
+                hero['image'] = f'./static/img/heroes/{name_words}.webp'
+        except:
+            pass
+
 
 def parse_hero(hero, link):
     soup = get_soup_from_page(link)
@@ -190,6 +218,7 @@ def parse_hero_list(link, print_n=MAX):
     heroes_parsed = 0
 
     hero_list = soup.find_all('tr', class_='hero-filter-element')
+    # print(image_list)
     for hero in hero_list:
         try:
             # add name here because it's easier than in the main hero page
@@ -197,6 +226,8 @@ def parse_hero_list(link, print_n=MAX):
             name = a.get('title')
             hero = {'name': name}
             page = a.get('href')
+
+            parse_image(hero, soup)
 
             parse_hero(hero, f'{PREFIX}{page}')
             heroes.append(hero)

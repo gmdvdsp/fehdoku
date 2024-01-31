@@ -137,7 +137,7 @@ def get_potential_game():
 
 def make_game(show=False):
     try:
-        read_heroes('./heroes_v1.json')
+        read_heroes('./heroes_v2.json')
         seed_categories_and_options()
 
         while True:
