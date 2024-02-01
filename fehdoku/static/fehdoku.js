@@ -13,6 +13,39 @@ const targets = grid.targets;
 
 let selectedCell = null;
 let selectedCellIndex = null;
+let resultElements = [];
+
+function seedResults() {
+    grid['options'].forEach(name => {
+        const resultItem = document.createElement('li');
+        resultItem.className = 'result-item';
+        resultItem.innerHTML = name;
+        let heroObject = null;
+
+        grid['heroes'].forEach(hero => {
+            // will always succeed, very nasty
+            if (hero['name'] === name) {
+                resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
+                resultItem.style.backgroundSize = "75px 75px";
+                heroObject = hero;
+            }
+        })
+
+        resultItem.addEventListener('click', function () {
+            searchInput.value = name;
+            nameAndTitle = name.split(':')
+            // selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
+            evaluateCorrectness(heroObject, name);
+
+            searchResults.style.display = 'none';
+            searchInput.value = null;
+            searchBar.style.opacity = '0';
+            dimmer.style.opacity = '0';
+        })
+
+        resultElements.push(resultItem);
+    })
+}
 
 function addDimEvent() {
     dimmer.addEventListener('click', function () {
@@ -56,52 +89,42 @@ function addSearchEvent() {
 function evaluateCorrectness(hero, result) {
     console.log(grid['solutions'][selectedCellIndex])
     if (grid['solutions'][selectedCellIndex].includes(result)) {
-        selectedCell.style.color = 'green';
+        selectedCell.style.backgroundColor = 'ghostwhite';
+
+        // todo: refactor into the CSS file
+        const gridLabel = document.createElement('div');
+        gridLabel.classList.add('grid-label');
+        gridLabel.innerText = hero['name'].split(':')[0];
+        selectedCell.appendChild(gridLabel);
+
+        const cellImage = document.createElement('img');
+        cellImage.src = hero['image'];
+        cellImage.style.position = "absolute";
+        cellImage.style.height = "149px";
+        cellImage.style.width = "149px";
+        selectedCell.appendChild(cellImage);
         console.log('Correct')
     } else {
-        selectedCell.style.color = 'red';
+        // selectedCell.style.backgroundColor = 'ghostwhite';
         console.log('Incorrect')
     }
-    // selectedCell.style.backgroundImage = "url(" + hero['image'] + ")";
     guessesNumber.innerText -= 1;
 }
 
 function displayResults(heroes, results) {
     searchResults.innerHTML = '';
 
-    if (results.length === 0) {
+    if (!results) {
         searchResults.style.display = 'none';
         return;
     }
 
     results.forEach(result => {
-        const resultItem = document.createElement('li');
-        resultItem.className = 'result-item';
-        resultItem.innerHTML = result;
-        let heroObject = null;
-
-        heroes.forEach(hero => {
-            // will always succeed, very nasty
-            if (hero['name'] === result) {
-                resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
-                heroObject = hero;
+        resultElements.forEach((resultItem => {
+            if (resultItem.innerHTML === result) {
+                searchResults.appendChild(resultItem);
             }
-        })
-
-        resultItem.addEventListener('click', function () {
-            searchInput.value = result;
-            // only take the name for now
-            nameAndTitle = result.split(':')
-            selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
-            evaluateCorrectness(heroObject, result);
-
-            searchResults.style.display = 'none';
-            searchInput.value = null;
-            searchBar.style.opacity = '0';
-            dimmer.style.opacity = '0';
-        });
-
-        searchResults.appendChild(resultItem);
+        }))
     });
 
     searchResults.style.display = 'block';
@@ -172,6 +195,7 @@ for (let i = 0; i < 16; i++) {
     }
 }
 
+seedResults();
 addDimEvent();
 addClickableCellEvent();
 addSearchEvent();

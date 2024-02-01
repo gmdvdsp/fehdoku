@@ -6,7 +6,7 @@ import os
 import re
 
 PREFIX = 'https://feheroes.fandom.com/'
-FILE_PATH = 'heroes_v2.json'
+FILE_PATH = 'heroes_v3.json'
 MAX = 1055
 
 heroes = []
@@ -180,23 +180,30 @@ def parse_skills(hero, soup):
         for a in table.find_all('a', class_=None):
             hero['Skills'].append(a.text)
 
-# todo: fix Gustav: Sovereign Slain; his picture on fandom is 'Gustav: Exsanguinator' for some reason
+
 def parse_image(hero, soup):
     image_list = soup.find_all('a', href=True)
-    # print(image_list)
     for a in image_list:
         try:
             if a.get('title') == hero['name']:
                 img = a.find('img')
                 name_words = img.get('alt').replace(' ', '_')
-                try:
-                    if name_words in img.get('data-src'):
-                        download(name_words, img.get('data-src'))
-                        print(img.get('data-src'))
-                except TypeError:
-                    if name_words in img.get('src'):
-                        download(name_words, img.get('src'))
-                        print(img.get('src'))
+
+                # custom case for Gustav, because his picture is named something different for some reason
+                if hero['name'] == 'Gustav: Sovereign Slain':
+                    download(name_words,
+                             'https://static.wikia.nocookie.net/feheroes_gamepedia_en/images/5/5d/Gustav_Exsanguinator_Face_FC.webp/revision/latest')
+                else:
+                    try:
+                        if name_words in img.get('data-src'):
+                            path = img.get('data-src').split('/scale-to-width-down')[0]
+                            download(name_words, path)
+                            print(path)
+                    except TypeError:
+                        if name_words in img.get('src'):
+                            path = img.get('src').split('/scale-to-width-down')[0]
+                            download(name_words, img.get('src').split('/scale-to-width-down')[0])
+                            print(path)
                 hero['image'] = f'./static/img/heroes/{name_words}.webp'
         except:
             pass

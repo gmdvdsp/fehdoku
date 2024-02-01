@@ -58,6 +58,7 @@ body {
     background-repeat: no-repeat;
     background-position: 0 50%;
     padding-left: 1.2em;
+    text-align: center;
 
     &:hover {
         background-color: gray;
@@ -92,7 +93,7 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    left: 25%;
+    left: 30%;
 }
 
 .grid-container {
@@ -147,6 +148,16 @@ body {
     background-color:rgba(255, 255, 255, 0);
     font-family: 'Lato', sans-serif;
     font-weight: bold;
+}
+
+.grid-label {
+    position: relative;
+    font-size: 16px;
+    color: white;
+    font-family: 'Lato', sans-serif;
+    z-index: 150;
+    top: 40%;
+    text-shadow: 2px 2px 2px black, 2px 2px 2px black;
 }
 
 .grid-item {
