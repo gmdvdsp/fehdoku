@@ -76,11 +76,6 @@ def play(grid, feedback=False):
     print(f'Game over. You got {correct_count} right.')
 
 
-def start():
-    grid = g.make_game(show=False)
-    # play(grid, feedback=True)
-    return grid
-
 if __name__ == '__main__':
     grid = g.make_game(show=False)
     play(grid, feedback=True)

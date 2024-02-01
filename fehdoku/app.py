@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import json
 import math
-import game
+import grid as g
 
 app = Flask(__name__)
 
@@ -14,13 +14,15 @@ def preprocess(categories, targets):
         if categories[i] == 'Version':
             version = float(target)
             targets[i] = str(float(math.floor(version)))
+        elif categories[i] == 'Weapons' or categories[i] == 'Skills':
+            targets[i] = g.remove_trailing_symbols(targets[i])
         elif not target:
             targets[i] = 'Normal Pool'
 
 
 @app.route("/")
 def index():
-    grid = game.start()
+    grid = g.make_game(forced_categories=['Skills'], show=True)
     for key, value in grid.items():
         if isinstance(value, set):
             grid[key] = list(value)

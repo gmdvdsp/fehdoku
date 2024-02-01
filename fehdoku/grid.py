@@ -1,8 +1,9 @@
 import json
 import random
 import math
+import re
 
-MIN_SOLUTIONS = 3
+MIN_SOLUTIONS = 1
 STAT_THRESHOLDS = 0
 CATEGORIES = ['Rarities', 'Special Rarity', 'Weapon', 'Color', 'Move Type', 'Entries', 'Version',
               'HP', 'ATK', 'SPD', 'DEF', 'RES', 'Weapons', 'Assists', 'Specials', 'Skills']
@@ -87,22 +88,33 @@ def handle_special(answer, value):
 
 
 def is_answer(hero, category, target):
-    value = hero[category]
+    values = hero[category]
     if category in ['HP', 'ATK', 'DEF', 'SPD', 'RES']:
-        check = handle_threshold(int(target), int(value[0]), int(value[-1]), thresholds=STAT_THRESHOLDS)
+        check = handle_threshold(int(target), int(values[0]), int(values[-1]), thresholds=STAT_THRESHOLDS)
     elif category == 'Version':
-        check = handle_version(float(target), float(value))
+        check = handle_version(float(target), float(values))
     elif category == 'Rarity':
-        check = handle_threshold(int(target), int(value[0]), int(value[-1]))
+        check = handle_threshold(int(target), int(values[0]), int(values[-1]))
     elif category == 'Special Rarity':
-        check = handle_special(target, value)
+        check = handle_special(target, values)
+    elif category == 'Weapons' or category == 'Skills':
+        check = any(remove_trailing_symbols(target) in value for value in values)
     else:
-        check = target in value
+        check = target in values
     return check
 
 
-def get_all_answers(category_1, answer_1, category_2, answer_2):
+# used to allow for heroes with any version of that skill or weapon
+def remove_trailing_symbols(text):
+    if text:
+        return re.sub(r'[^a-zA-Z]+$', '', text)
+    else:
+        return None
+
+
+def get_all_heroes_with_targets(category_1, answer_1, category_2, answer_2):
     ret = []
+    # answer_1_stripped, answer_2_stripped = remove_trailing_symbols(answer_1), remove_trailing_symbols(answer_2)
     for hero in heroes:
         check_1, check_2 = is_answer(hero, category_1, answer_1), is_answer(hero, category_2, answer_2)
 
@@ -112,42 +124,64 @@ def get_all_answers(category_1, answer_1, category_2, answer_2):
     return ret
 
 
-def get_potential_grid(categories, answers):
+def get_potential_grid(categories, targets):
     # todo: refactor
-    top_left = get_all_answers(categories[0], answers[0], categories[3], answers[3])
-    top_mid = get_all_answers(categories[1], answers[1], categories[3], answers[3])
-    top_right = get_all_answers(categories[2], answers[2], categories[3], answers[3])
-    left = get_all_answers(categories[0], answers[0], categories[4], answers[4])
-    mid = get_all_answers(categories[1], answers[1], categories[4], answers[4])
-    right = get_all_answers(categories[2], answers[2], categories[4], answers[4])
-    bottom_left = get_all_answers(categories[0], answers[0], categories[5], answers[5])
-    bottom_mid = get_all_answers(categories[1], answers[1], categories[5], answers[5])
-    bottom_right = get_all_answers(categories[2], answers[2], categories[5], answers[5])
+    top_left = get_all_heroes_with_targets(categories[0], targets[0], categories[3], targets[3])
+    top_mid = get_all_heroes_with_targets(categories[1], targets[1], categories[3], targets[3])
+    top_right = get_all_heroes_with_targets(categories[2], targets[2], categories[3], targets[3])
+    left = get_all_heroes_with_targets(categories[0], targets[0], categories[4], targets[4])
+    mid = get_all_heroes_with_targets(categories[1], targets[1], categories[4], targets[4])
+    right = get_all_heroes_with_targets(categories[2], targets[2], categories[4], targets[4])
+    bottom_left = get_all_heroes_with_targets(categories[0], targets[0], categories[5], targets[5])
+    bottom_mid = get_all_heroes_with_targets(categories[1], targets[1], categories[5], targets[5])
+    bottom_right = get_all_heroes_with_targets(categories[2], targets[2], categories[5], targets[5])
 
-    return get_grid(categories, answers,[top_left, top_mid, top_right, left, mid, right, bottom_left, bottom_mid, bottom_right])
+    return get_grid(categories, targets, [top_left, top_mid, top_right, left, mid, right, bottom_left, bottom_mid, bottom_right])
 
 
-def get_potential_game():
+def get_targets(categories):
+    ret = []
+    for category in categories:
+        ret.append(random.choice(list(category_values[category])))
+    return ret
+
+
+def get_potential_game(forced_categories):
+    if forced_categories is None:
+        forced_categories = []
+    categories = forced_categories
+
     random.seed()
-    categories = random.sample(CATEGORIES, 6)
-    answers = [random.choice(random.sample(list(category_values[category]), 1)) for category in categories]
+    random.shuffle(CATEGORIES)
 
-    return get_potential_grid(categories, answers)
+    chosen_count = len(categories)
+    i = 0
+    while chosen_count < 6:
+        if CATEGORIES[i] not in categories:
+            categories.append(CATEGORIES[i])
+            chosen_count += 1
+        i += 1
+    # targets = [random.choice(random.sample(list(category_values[category]), 1)) for category in categories]
+    targets = get_targets(categories)
+
+    return get_potential_grid(categories, targets)
 
 
-def make_game(show=False):
+def make_game(forced_categories=None, show=False):
     try:
         read_heroes('./heroes_v2.json')
         seed_categories_and_options()
 
+        tries = 0
         while True:
-            grid = get_potential_game()
+            grid = get_potential_game(forced_categories)
 
             if all(solution >= MIN_SOLUTIONS for solution in get_solutions_length(grid)):
                 break
 
-        if show:
-            print(grid)
+            if show:
+                tries += 1
+                print(tries)
 
         return grid
     except OSError:

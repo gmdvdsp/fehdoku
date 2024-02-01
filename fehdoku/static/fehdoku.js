@@ -4,7 +4,6 @@ const searchBar = document.getElementById('searchBar');
 const dimmer = document.getElementById('dimmer');
 const guessesNumber = document.getElementById('guessesNumber');
 
-
 const searchResults = document.getElementById('searchResults');
 const gridContainer = document.getElementById('gridContainer');
 
@@ -14,6 +13,7 @@ const targets = grid.targets;
 let selectedCell = null;
 let selectedCellIndex = null;
 let resultElements = [];
+let initialGuesses = 8;
 
 function seedResults() {
     grid['options'].forEach(name => {
@@ -23,7 +23,7 @@ function seedResults() {
         let heroObject = null;
 
         grid['heroes'].forEach(hero => {
-            // will always succeed, very nasty
+            // very nasty
             if (hero['name'] === name) {
                 resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
                 resultItem.style.backgroundSize = "75px 75px";
@@ -35,13 +35,8 @@ function seedResults() {
             searchInput.value = name;
             nameAndTitle = name.split(':')
             // selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
-            evaluateCorrectness(heroObject, name);
-
-            searchResults.style.display = 'none';
-            searchInput.value = null;
-            searchBar.style.opacity = '0';
-            dimmer.style.opacity = '0';
-        })
+            evaluateCorrectness(heroObject, name, resultItem);
+        }, {once: true})
 
         resultElements.push(resultItem);
     })
@@ -86,12 +81,12 @@ function addSearchEvent() {
     });
 }
 
-function evaluateCorrectness(hero, result) {
+function evaluateCorrectness(hero, result, resultItem) {
     console.log(grid['solutions'][selectedCellIndex])
     if (grid['solutions'][selectedCellIndex].includes(result)) {
         selectedCell.style.backgroundColor = 'ghostwhite';
 
-        // todo: refactor into the CSS file
+        // todo: refactor
         const gridLabel = document.createElement('div');
         gridLabel.classList.add('grid-label');
         gridLabel.innerText = hero['name'].split(':')[0];
@@ -103,9 +98,16 @@ function evaluateCorrectness(hero, result) {
         cellImage.style.height = "149px";
         cellImage.style.width = "149px";
         selectedCell.appendChild(cellImage);
+
+        // this hides the dropdown
+        searchResults.style.display = 'none';
+        searchInput.value = null;
+        searchBar.style.opacity = '0';
+        dimmer.style.opacity = '0';
+
         console.log('Correct')
     } else {
-        // selectedCell.style.backgroundColor = 'ghostwhite';
+        resultItem.classList.toggle("clicked");
         console.log('Incorrect')
     }
     guessesNumber.innerText -= 1;
@@ -133,12 +135,12 @@ function displayResults(heroes, results) {
 function toggleDropdown(i, cell) {
     selectedCell = cell;
     selectedCellIndex = i;
+    searchInput.placeholder = grid['solutions'][selectedCellIndex].length + ' possible solutions...';
     if (searchBar.style.opacity === '0' || searchBar.style.opacity === '') {
         selectedCell = cell;
         searchBar.style.opacity = '1';
         dimmer.style.opacity = '0.5';
     } else {
-        // click away from dropdown event is here for some reason
         selectedCell = null;
         searchBar.style.opacity = '0';
         dimmer.style.opacity = '0';
@@ -195,6 +197,7 @@ for (let i = 0; i < 16; i++) {
     }
 }
 
+guessesNumber.innerText = initialGuesses
 seedResults();
 addDimEvent();
 addClickableCellEvent();
