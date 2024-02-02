@@ -76,7 +76,7 @@ def seed_categories_and_options(show=False):
 
 
 def handle_threshold(answer, start, end, thresholds=0):
-    return start + thresholds <= answer <= end + thresholds
+    return (start + thresholds) <= answer <= (end + thresholds)
 
 
 def handle_version(answer, version):
@@ -149,18 +149,11 @@ def get_targets(categories):
 def get_potential_game(forced_categories):
     if forced_categories is None:
         forced_categories = []
-    categories = forced_categories
+    categories = []
 
-    random.seed()
-    random.shuffle(CATEGORIES)
-
-    chosen_count = len(categories)
-    i = 0
-    while chosen_count < 6:
-        if CATEGORIES[i] not in categories:
-            categories.append(CATEGORIES[i])
-            chosen_count += 1
-        i += 1
+    while not set(forced_categories).issubset(categories):
+        random.seed()
+        categories = random.sample(CATEGORIES, 6)
     # targets = [random.choice(random.sample(list(category_values[category]), 1)) for category in categories]
     targets = get_targets(categories)
 
@@ -181,7 +174,7 @@ def make_game(forced_categories=None, show=False):
 
             if show:
                 tries += 1
-                print(tries)
+                print(tries, get_solutions_length(grid))
 
         return grid
     except OSError:

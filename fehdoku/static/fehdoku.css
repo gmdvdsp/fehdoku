@@ -54,7 +54,7 @@ body {
 }
 
 .result-item {
-    margin: 0 0 .2em 0;
+    margin: 0 0 0 0;
     background-repeat: no-repeat;
     background-position: 0 50%;
     padding-left: 1.2em;
@@ -67,7 +67,13 @@ body {
     }
 }
 
-.result-item.clicked {
+.result-item.correct {
+  pointer-events: none;
+  color: lightgray;
+}
+
+.result-item.incorrect {
+  pointer-events: none;
   color: red;
 }
 

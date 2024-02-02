@@ -13,7 +13,7 @@ const targets = grid.targets;
 let selectedCell = null;
 let selectedCellIndex = null;
 let resultElements = [];
-let initialGuesses = 8;
+let initialGuesses = 12;
 
 function seedResults() {
     grid['options'].forEach(name => {
@@ -31,12 +31,14 @@ function seedResults() {
             }
         })
 
-        resultItem.addEventListener('click', function () {
+        function handleResultClickEvent(event) {
             searchInput.value = name;
             nameAndTitle = name.split(':')
             // selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
             evaluateCorrectness(heroObject, name, resultItem);
-        }, {once: true})
+        }
+
+        resultItem.addEventListener('click', handleResultClickEvent)
 
         resultElements.push(resultItem);
     })
@@ -44,6 +46,7 @@ function seedResults() {
 
 function addDimEvent() {
     dimmer.addEventListener('click', function () {
+        console.log('clicked')
         dimmer.style.opacity = '0';
     });
 }
@@ -95,8 +98,8 @@ function evaluateCorrectness(hero, result, resultItem) {
         const cellImage = document.createElement('img');
         cellImage.src = hero['image'];
         cellImage.style.position = "absolute";
-        cellImage.style.height = "149px";
-        cellImage.style.width = "149px";
+        cellImage.style.height = "150px";
+        cellImage.style.width = "150px";
         selectedCell.appendChild(cellImage);
 
         // this hides the dropdown
@@ -105,9 +108,10 @@ function evaluateCorrectness(hero, result, resultItem) {
         searchBar.style.opacity = '0';
         dimmer.style.opacity = '0';
 
+        resultItem.classList.toggle("correct");
         console.log('Correct')
     } else {
-        resultItem.classList.toggle("clicked");
+        resultItem.classList.toggle("incorrect");
         console.log('Incorrect')
     }
     guessesNumber.innerText -= 1;

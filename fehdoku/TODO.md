@@ -1,6 +1,4 @@
 High:
-* Implement new algorithm that makes the weapons
-  and skill categories show up more.
 * Implement new algorithm to also allow for ranges for numerical values to allow
   more options.
 * Add a score system to punish choosing the
@@ -13,6 +11,7 @@ High:
 * Move business logic out of client-side JS code.
 * Generate categories for the next year ahead of time to reduce the brute force search
   load.
+* Fix range bug.
 
 Low:
 * Add a logo.
