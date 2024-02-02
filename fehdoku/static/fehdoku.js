@@ -13,41 +13,56 @@ const targets = grid.targets;
 let selectedCell = null;
 let selectedCellIndex = null;
 let resultElements = [];
-let initialGuesses = 12;
+let guessesLeft = 1;
+let score = 0;
 
-function seedResults() {
+function makeResultItems() {
     grid['options'].forEach(name => {
+        // Create a resultItem for every name.
         const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
         resultItem.innerHTML = name;
-        let heroObject = null;
+        let hero = null;
 
-        grid['heroes'].forEach(hero => {
-            // very nasty
-            if (hero['name'] === name) {
-                resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
-                resultItem.style.backgroundSize = "75px 75px";
-                heroObject = hero;
+        // Set the appropriate image.
+        grid['heroes'].forEach(_hero => {
+            if (_hero['name'] === name) {
+                resultItem.style.backgroundImage = "url(" + _hero['image'] + ")";
+                hero = _hero;
             }
         })
 
-        function handleResultClickEvent(event) {
+        function handleResultClickEvent() {
             searchInput.value = name;
-            nameAndTitle = name.split(':')
-            // selectedCell.innerHTML = nameAndTitle[0] + ':\n' + nameAndTitle[1];
-            evaluateCorrectness(heroObject, name, resultItem);
+            name = name.split(':')
+            evaluateCorrectness(hero, name, resultItem);
         }
-
         resultItem.addEventListener('click', handleResultClickEvent)
 
         resultElements.push(resultItem);
     })
 }
 
+function toggleDimmerOff() {
+    dimmer.style.opacity = '0';
+    dimmer.style.pointerEvents = 'none';
+}
+
+function toggleSearchOn() {
+    searchResults.style.display = 'block';
+}
+function toggleSearchOff() {
+    searchResults.style.display = 'none';
+    searchInput.value = null;
+    searchBar.style.opacity = '0';
+}
+
 function addDimEvent() {
     dimmer.addEventListener('click', function () {
-        console.log('clicked')
-        dimmer.style.opacity = '0';
+        // console.log('clicked')
+        toggleDimmerOff();
+        toggleSearchOff();
+        displayResults([]);
     });
 }
 
@@ -84,6 +99,14 @@ function addSearchEvent() {
     });
 }
 
+function calcScore() {
+    return 100*(1055 - grid['solutions'][selectedCellIndex].length)/1055
+}
+
+function endGame() {
+    console.log('Game ended. Score:' + score + ' out of 900.')
+}
+
 function evaluateCorrectness(hero, result, resultItem) {
     console.log(grid['solutions'][selectedCellIndex])
     if (grid['solutions'][selectedCellIndex].includes(result)) {
@@ -108,22 +131,20 @@ function evaluateCorrectness(hero, result, resultItem) {
         searchBar.style.opacity = '0';
         dimmer.style.opacity = '0';
 
+        score += calcScore()
         resultItem.classList.toggle("correct");
-        console.log('Correct')
     } else {
         resultItem.classList.toggle("incorrect");
-        console.log('Incorrect')
     }
-    guessesNumber.innerText -= 1;
+    guessesLeft -= 1;
+    if (guessesLeft === 0) {
+        endGame();
+    }
 }
 
 function displayResults(heroes, results) {
+    // Clear the results first.
     searchResults.innerHTML = '';
-
-    if (!results) {
-        searchResults.style.display = 'none';
-        return;
-    }
 
     results.forEach(result => {
         resultElements.forEach((resultItem => {
@@ -133,7 +154,7 @@ function displayResults(heroes, results) {
         }))
     });
 
-    searchResults.style.display = 'block';
+    toggleSearchOn();
 }
 
 function toggleDropdown(i, cell) {
@@ -144,6 +165,7 @@ function toggleDropdown(i, cell) {
         selectedCell = cell;
         searchBar.style.opacity = '1';
         dimmer.style.opacity = '0.5';
+        dimmer.style.pointerEvents = 'auto';
     } else {
         selectedCell = null;
         searchBar.style.opacity = '0';
@@ -201,8 +223,8 @@ for (let i = 0; i < 16; i++) {
     }
 }
 
-guessesNumber.innerText = initialGuesses
-seedResults();
+guessesNumber.innerText = guessesLeft
+makeResultItems();
 addDimEvent();
 addClickableCellEvent();
 addSearchEvent();
