@@ -89,6 +89,7 @@
 <script type="text/javascript">
     grid = {{ grid | tojson }}
 </script>
-<script src="{{ url_for('static', filename='fehdoku.js') }}"></script>
+<script src="{{ url_for('static', filename='lodash.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='fehdoku.js') }}"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 // const categoryCellIndexes = [0, 1, 2, 3, 4, 8, 12];
+// import {_} from 'lodash.js';
 const searchInput = document.getElementById('searchInput');
 const searchBar = document.getElementById('searchBar');
 const guessesNumber = document.getElementById('guessesNumber');
@@ -20,7 +21,7 @@ let resultElements = [];
 // A 9-element array of sets where each maps to the selectedCellIndex for already chosen heroes.
 let cellCorrectness = Array.from({length: 9})
     .map(() => ({"correct": new Set(), "incorrect": new Set()}));
-let guessesLeft = 1;
+let guessesLeft = 9;
 let score = 0;
 
 function toggleDimmerOn() {
@@ -120,7 +121,7 @@ function addClickableCellEvent() {
 }
 
 function addSearchEvent() {
-    function displayResults(searchString) {
+    const debounceSearch = _.debounce(searchString => {
         // Reset the search.
 
         searchResults.innerHTML = '';
@@ -138,11 +139,11 @@ function addSearchEvent() {
         }))
 
         toggleSearchResultsOn();
-    }
+    }, 200)
 
     searchInput.addEventListener('input', input => {
         const searchString = searchInput.value.toLowerCase();
-        displayResults(searchString);
+        debounceSearch(searchString);
     });
 }
 
@@ -237,14 +238,15 @@ function decrementGuesses() {
 
 function evaluateCorrectness(hero, result, resultItem) {
     if (grid['solutions'][selectedCellIndex].includes(result)) {
-        selectedCell.style.backgroundColor = 'ghostwhite';
-
         // todo: refactor
         const gridLabel = document.createElement('div');
         gridLabel.classList.add('grid-label');
         gridLabel.innerText = hero['name'].split(':')[0];
+        gridLabel.style.zIndex = "300";
         selectedCell.appendChild(gridLabel);
 
+        const blackBox = document.createElement('div');
+        blackBox.classList.add('grid-hero-block');
         const cellImage = document.createElement('img');
         cellImage.src = hero['image'];
         cellImage.style.position = "absolute";
@@ -252,8 +254,17 @@ function evaluateCorrectness(hero, result, resultItem) {
         cellImage.style.width = "150px";
         // top left
         if (selectedCellIndex === 0) {
-            cellImage.style.borderRadius = '20px 0 0 0';
+            cellImage.classList.add('top-left');
+        } else if (selectedCellIndex === 2) {
+            cellImage.classList.add('top-right');
+        } else if (selectedCellIndex === 6) {
+            cellImage.classList.add('bottom-left');
+            blackBox.classList.add('bottom-left');
+        } else if (selectedCellIndex === 8) {
+            cellImage.classList.add('bottom-right');
+            blackBox.classList.add('bottom-right');
         }
+        selectedCell.appendChild(blackBox)
         selectedCell.appendChild(cellImage);
 
         toggleSearchOff();
@@ -290,8 +301,18 @@ function makeCategoryRow() {
         let valueID = 'categoryValue' + i.toString();
         let categoryLabel = document.getElementById(labelID);
         let categoryValue = document.getElementById(valueID);
-        categoryLabel.childNodes[0].textContent = grid['categories'][i-1].toUpperCase();
-        categoryValue.textContent = grid['targets'][i-1].toUpperCase();
+        categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
+        categoryValue.textContent = grid['targets'][i - 1].toUpperCase();
+        // if (grid['categories'][i-1] === 'Move Type') {
+        //     let img = document.createElement('img');
+        //     img.classList.add('category-image');
+        //     img.src = './static/img/movement/Cavalry.webp';
+        //     categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
+        //     categoryLabel.appendChild(img);
+        // } else {
+        //     categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
+        //     categoryValue.textContent = grid['targets'][i - 1].toUpperCase();
+        // }
     })
 }
 

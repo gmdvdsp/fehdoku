@@ -8,7 +8,6 @@ app = Flask(__name__)
 
 # null is a possible JSON value for Special Rarity, which gets converted to python's None,
 # which breaks the frontend since it can't access a None property.
-# also round the version down to read X.0.
 def preprocess(categories, targets):
     for i, target in enumerate(targets):
         if categories[i] == 'Version':
