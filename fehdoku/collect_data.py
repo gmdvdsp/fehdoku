@@ -24,8 +24,7 @@ def get_soup_from_page(link, debug=False):
     return soup
 
 
-def format(text):
-    """ Strips whitespace """
+def strip_whitespace(text):
     return text.replace(u'\xa0', u' ').strip()
 
 
@@ -51,7 +50,7 @@ def write(contents, path=FILE_PATH, return_json=True):
 
 
 def handle_rarities(hero, tr):
-    rarities = format(tr.find('td').text.strip())
+    rarities = strip_whitespace(tr.find('td').text.strip())
 
     # turn all numbers in the string into a list of numbers
     numbers = re.findall(r'\d+', rarities)
@@ -62,7 +61,7 @@ def handle_rarities(hero, tr):
     special = re.search(r'(?<=\D)\s*[A-Za-z\s]+$', rarities)
     if special:
         # remove double spaces
-        group = format(re.sub(r'\s{2,}', ' ', special.group()))
+        group = strip_whitespace(re.sub(r'\s{2,}', ' ', special.group()))
         hero['Special Rarity'] = group
 
         if group == 'SR':
@@ -70,7 +69,7 @@ def handle_rarities(hero, tr):
 
 
 def handle_weapon_type(hero, tr):
-    full_weapon_type = format(tr.find('a').get('title'))
+    full_weapon_type = strip_whitespace(tr.find('a').get('title'))
     color_and_weapon = full_weapon_type.split(' ')
     implicit_color_weapons = {'Sword': 'Red', 'Axe': 'Green', 'Lance': 'Blue', 'Staff': 'Colorless'}
 
@@ -92,7 +91,7 @@ def handle_entry(hero, tr):
 
 
 def handle_version(hero, tr):
-    versions = format(tr.find('a').text)
+    versions = strip_whitespace(tr.find('a').text)
     hero['Version'] = versions
 
 

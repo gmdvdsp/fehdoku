@@ -1,9 +1,10 @@
 
 body {
-    padding: 0;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
     background: #f1f5f9;
-    margin-bottom: 100px;
+    place-items: center;
+    overflow: hidden;
 }
 
 #dimmer {
@@ -27,9 +28,15 @@ body {
     border-bottom: 1px solid #2596be;
 }
 
-#headerContent {
-    margin: 0 auto;
-    width: 200px;
+#footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    color: black;
+    text-align: center;
+    border-top: 1px solid #2596be;
 }
 
 #searchBar {
@@ -40,16 +47,16 @@ body {
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
     /*Because each category is 150px*/
-    left: 75px;
+    left: 120px;
     top: 20px;
-    z-index: 200;
+    z-index: 300;
 }
 
 #searchInput {
     height: 30px;
     width: 500px;
     border-radius: 10px 10px 10px 10px;
-    box-shadow: 5px 5px 10px 2px rgba(0,0,0,.8);
+    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, .8);
     border-color: black;
 }
 
@@ -69,13 +76,13 @@ body {
 }
 
 .result-item.correct {
-  pointer-events: none;
-  color: lightgray;
+    pointer-events: none;
+    color: lightgray;
 }
 
 .result-item.incorrect {
-  pointer-events: none;
-  color: red;
+    pointer-events: none;
+    color: red;
 }
 
 .search-results {
@@ -85,7 +92,7 @@ body {
     width: 500px;
     background-color: ghostwhite;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    display: none;
+    opacity: 0;
     border: 1px solid #5f5a50;
     padding: 0;
     margin: 0;
@@ -100,20 +107,119 @@ body {
 }
 
 #gameWrapper {
-    display: flex;
-    flex-direction: column;
     position: absolute;
     justify-content: center;
     align-items: center;
     text-align: center;
-    left: 30%;
+    top: 5vw;
+    left: 30.5vw;
+    z-index: 100;
+}
+
+#gridWrapper {
+    position: absolute;
+}
+
+#game-over-box {
+    border-radius: 25px;
+    width: 350px;
+    height: 500px;
+    background-color: white;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    align-items: center;
+    flex-direction: column;
+
+    position: absolute;
+    top: 1000%;
+    bottom: 0;
+    left: 40%;
+    right: 0;
+
+    margin: auto;
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#game-over-label {
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+    position: absolute;
+    top: 5%;
+}
+
+#game-over-value {
+    position: relative;
+    font-family: 'Lato', sans-serif;
+    color: dimgray;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.game-over-grid {
+    display: grid;
+    position: absolute;
+    top: 20%;
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 60px);
+    row-gap: 3px;
+    column-gap: 3px;
+}
+
+.game-over-grid-item {
+    display: flex;
+    border: 1px solid #f5f6f8;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    font-weight: bold;
+    white-space: pre;
+    background: lightgray no-repeat;
+    color: gray;
+    border-radius: 10px 10px 10px 10px;
+}
+
+#score-label {
+    display: flex;
+    flex-direction: column;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+    position: absolute;
+    top: 60%;
+    color: gray;
+    justify-content: center;
+}
+
+.score-feedback {
+    position: relative;
+    font-family: 'Lato', sans-serif;
+    font-weight: bold;
+}
+
+#scoreValue {
+    font-size: 40px;
+    color: black;
+}
+
+#scoreText {
+    font-size: 30px;
+    color: black;
 }
 
 .grid-container {
     display: grid;
+    position: absolute;
     grid-template-columns: repeat(4, 150px);
     grid-template-rows: repeat(4, 150px);
     width: fit-content;
+    row-gap: 1px;
+    column-gap: 1px;
 }
 
 #guessesNumber {
@@ -130,8 +236,8 @@ body {
     text-align: center;
     font-weight: bold;
     font-size: 16px;
-    left: 110%;
-    top: 55%;
+    top: 950%;
+    left: 130%;
     position: absolute;
 }
 
@@ -154,11 +260,10 @@ body {
 .category-item {
     position: relative;
     display: flex;
-    border: 1px solid #f5f6f8;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color:rgba(255, 255, 255, 0);
+    background-color: rgba(255, 255, 255, 0);
     font-family: 'Lato', sans-serif;
     font-weight: bold;
 }
@@ -186,6 +291,7 @@ body {
     font-weight: bold;
     white-space: pre;
     background: white no-repeat;
+    overflow: hidden;
 }
 
 .grid-item:hover {
@@ -193,17 +299,17 @@ body {
 }
 
 .top-left {
-    border-radius: 10px 0 0 0;
+    border-radius: 20px 0 0 0;
 }
 
 .top-right {
-    border-radius: 0 10px 0 0;
+    border-radius: 0 20px 0 0;
 }
 
 .bottom-left {
-    border-radius: 0 0 0 10px;
+    border-radius: 0 0 0 20px;
 }
 
 .bottom-right {
-    border-radius: 0 0 10px 0;
+    border-radius: 0 0 20px 0;
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="darkreader-lock">
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="icon" type="image/x-icon" href="static/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="static/fehdoku.css">
@@ -10,16 +11,38 @@
 </head>
 <body>
 
-
 <div id="header">
     <div id="headerContent">
     </div>
 </div>
 
-<div class="game" id="gameWrapper">
+<div id="gameWrapper">
     <div class="search" id="searchBar">
         <input type="text" id="searchInput" class="searchTerm" placeholder="">
         <ul id="searchResults" class="search-results"></ul>
+    </div>
+
+    <div id="game-over-box">
+        <div id="game-over-label">
+            SUMMARY
+            <div id="game-over-value">FEHDOKU 1</div>
+        </div>
+        <div class="game-over-grid">
+            <div class="game-over-grid-item" id="gameOverGrid1"></div>
+            <div class="game-over-grid-item" id="gameOverGrid2"></div>
+            <div class="game-over-grid-item" id="gameOverGrid3"></div>
+            <div class="game-over-grid-item" id="gameOverGrid4"></div>
+            <div class="game-over-grid-item" id="gameOverGrid5"></div>
+            <div class="game-over-grid-item" id="gameOverGrid6"></div>
+            <div class="game-over-grid-item" id="gameOverGrid7"></div>
+            <div class="game-over-grid-item" id="gameOverGrid8"></div>
+            <div class="game-over-grid-item" id="gameOverGrid9"></div>
+        </div>
+        <div id="score-label">
+            SCORE
+            <div class="score-feedback" id="scoreValue"></div>
+            <div class="score-feedback" id="scoreText"></div>
+        </div>
     </div>
 
     <div class="grid-container" id="gridContainer"></div>
@@ -27,12 +50,14 @@
     <div id="guessesText">GUESSES LEFT
         <div id="guessesNumber">8</div>
     </div>
+
+    <div id="dimmer"></div>
 </div>
 
-<div id="dimmer"></div>
+<div id="footer">|</div>
 
 <script type="text/javascript">
-    grid = {{ grid|tojson }}
+    grid = {{ grid | tojson }}
 </script>
 <script src="{{ url_for('static', filename='fehdoku.js') }}"></script>
 </body>
