@@ -24,7 +24,7 @@ let guessesLeft = 1;
 let score = 0;
 
 function toggleDimmerOn() {
-    dimmer.style.opacity = '0.5';
+    dimmer.style.opacity = '0.25';
     dimmer.style.pointerEvents = 'auto';
 }
 
@@ -220,7 +220,6 @@ function makeGameOverGrid() {
 }
 
 function endGame() {
-    // console.log('Game ended. Score: ' + score + ' out of 900.');
     toggleDimmerOn();
     makeGameOverGrid();
     toggleGameOverBoxOn();
@@ -251,6 +250,10 @@ function evaluateCorrectness(hero, result, resultItem) {
         cellImage.style.position = "absolute";
         cellImage.style.height = "150px";
         cellImage.style.width = "150px";
+        // top left
+        if (selectedCellIndex === 0) {
+            cellImage.style.borderRadius = '20px 0 0 0';
+        }
         selectedCell.appendChild(cellImage);
 
         toggleSearchOff();
@@ -270,56 +273,33 @@ function evaluateCorrectness(hero, result, resultItem) {
     decrementGuesses();
 }
 
-// todo: REFACTOR HOLY
-for (let i = 0; i < 16; i++) {
-    const gridItem = document.createElement('div');
-    gridItem.classList.add('grid-item');
-    const categoryItem = document.createElement('div');
-    categoryItem.classList.add('category-item');
-    const categoryLabel = document.createElement('div');
-    categoryLabel.classList.add('category-label');
-    const categoryValue = document.createElement('div');
-    categoryValue.classList.add('category-value');
+function makeCategoryColumn() {
+    [4,5,6].forEach(i => {
+        let labelID = 'categoryLabel' + i.toString();
+        let valueID = 'categoryValue' + i.toString();
+        let categoryLabel = document.getElementById(labelID);
+        let categoryValue = document.getElementById(valueID);
+        categoryLabel.childNodes[0].textContent = grid['categories'][i-1].toUpperCase();
+        categoryValue.textContent = grid['targets'][i-1].toUpperCase();
+    })
+}
 
-    categoryItem.appendChild(categoryLabel);
-
-    // extremely evil!
-    if (i === 0) {
-        gridContainer.appendChild(categoryItem);
-    } else if (i === 1 || i === 2 || i === 3 || i === 4) {
-        categoryLabel.textContent = categories[i - 1].toUpperCase();
-        categoryValue.textContent = targets[i - 1].toUpperCase();
-        categoryLabel.appendChild(categoryValue);
-        gridContainer.appendChild(categoryItem);
-    } else if (i === 8) {
-        categoryLabel.textContent = categories[4].toUpperCase();
-        categoryValue.textContent = targets[4].toUpperCase();
-        categoryLabel.appendChild(categoryValue);
-        gridContainer.appendChild(categoryItem);
-    } else if (i === 12) {
-        categoryLabel.textContent = categories[5].toUpperCase();
-        categoryValue.textContent = targets[5].toUpperCase();
-        categoryLabel.appendChild(categoryValue);
-        gridContainer.appendChild(categoryItem);
-    } else {
-        categoryLabel.appendChild(categoryValue);
-        gridContainer.appendChild(gridItem);
-    }
-
-    if (i === 5) {
-        gridItem.classList.add('top-left');
-    } else if (i === 7) {
-        gridItem.classList.add('top-right');
-    } else if (i === 13) {
-        gridItem.classList.add('bottom-left');
-    } else if (i === 15) {
-        gridItem.classList.add('bottom-right');
-    }
+function makeCategoryRow() {
+    [1,2,3].forEach(i => {
+        let labelID = 'categoryLabel' + i.toString();
+        let valueID = 'categoryValue' + i.toString();
+        let categoryLabel = document.getElementById(labelID);
+        let categoryValue = document.getElementById(valueID);
+        categoryLabel.childNodes[0].textContent = grid['categories'][i-1].toUpperCase();
+        categoryValue.textContent = grid['targets'][i-1].toUpperCase();
+    })
 }
 
 // On run:
 guessesNumber.innerText = guessesLeft;
 makeResultItems();
+makeCategoryColumn();
+makeCategoryRow();
 addDimEvent();
 addClickableCellEvent();
 addSearchEvent();

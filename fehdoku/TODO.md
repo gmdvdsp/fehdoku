@@ -1,9 +1,8 @@
 High:
-* Add a game-over box. 
+* Center the grid on only the 3x3 for all screens. (IN-PROGRESS)
 * Implement new algorithm to also allow for ranges for numerical values to allow
   more options.
-* Add an undo system. 
-* Center the grid on only the 3x3 for all screens.
+* Add an undo system.
 * Refactor the seeding algorithm for the grid cells.
 * Move business logic out of client-side JS code.
 * Generate categories for the next year ahead of time to reduce the brute force search
