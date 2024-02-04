@@ -72,24 +72,25 @@ function clearResults() {
 }
 
 function makeResultItems() {
-    grid['options'].forEach(name => {
+    grid['heroes'].forEach(hero => {
         // Create a resultItem for every name.
+        let name = hero['name'];
         const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
         resultItem.innerHTML = name;
-        let hero = null;
 
         // Set the appropriate image.
-        grid['heroes'].forEach(_hero => {
-            if (_hero['name'] === name) {
-                resultItem.style.backgroundImage = "url(" + _hero['image'] + ")";
-                hero = _hero;
-            }
-        })
+        resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
+        // grid['images'].forEach(_hero => {
+        //     if (_hero['name'] === name) {
+        //         resultItem.style.backgroundImage = "url(" + _hero['image'] + ")";
+        //         heroObject = _hero;
+        //     }
+        // })
 
         function handleResultClickEvent() {
             searchInput.value = name;
-            evaluateCorrectness(hero, name, resultItem);
+            evaluateCorrectness(hero, resultItem);
         }
 
         resultItem.addEventListener('click', handleResultClickEvent)
@@ -236,8 +237,9 @@ function decrementGuesses() {
     }
 }
 
-function evaluateCorrectness(hero, result, resultItem) {
-    if (grid['solutions'][selectedCellIndex].includes(result)) {
+function evaluateCorrectness(hero, resultItem) {
+    let name = hero['name'];
+    if (grid['solutions'][selectedCellIndex].includes(name)) {
         // todo: refactor
         const gridLabel = document.createElement('div');
         gridLabel.classList.add('grid-label');
@@ -271,12 +273,12 @@ function evaluateCorrectness(hero, result, resultItem) {
         toggleDimmerOff();
 
         score += calcScore(selectedCellIndex);
-        cellCorrectness[selectedCellIndex]['correct'].add(result)
+        cellCorrectness[selectedCellIndex]['correct'].add(name)
         resultItem.classList.toggle("correct");
         selectedCell.style.pointerEvents = 'none';
         console.log('correct');
     } else {
-        cellCorrectness[selectedCellIndex]['incorrect'].add(result)
+        cellCorrectness[selectedCellIndex]['incorrect'].add(name)
         resultItem.classList.toggle("incorrect");
         console.log('incorrect');
     }
@@ -284,19 +286,8 @@ function evaluateCorrectness(hero, result, resultItem) {
     decrementGuesses();
 }
 
-function makeCategoryColumn() {
-    [4,5,6].forEach(i => {
-        let labelID = 'categoryLabel' + i.toString();
-        let valueID = 'categoryValue' + i.toString();
-        let categoryLabel = document.getElementById(labelID);
-        let categoryValue = document.getElementById(valueID);
-        categoryLabel.childNodes[0].textContent = grid['categories'][i-1].toUpperCase();
-        categoryValue.textContent = grid['targets'][i-1].toUpperCase();
-    })
-}
-
-function makeCategoryRow() {
-    [1,2,3].forEach(i => {
+function makeCategories() {
+    [1,2,3,4,5,6].forEach(i => {
         let labelID = 'categoryLabel' + i.toString();
         let valueID = 'categoryValue' + i.toString();
         let categoryLabel = document.getElementById(labelID);
@@ -319,8 +310,7 @@ function makeCategoryRow() {
 // On run:
 guessesNumber.innerText = guessesLeft;
 makeResultItems();
-makeCategoryColumn();
-makeCategoryRow();
+makeCategories();
 addDimEvent();
 addClickableCellEvent();
 addSearchEvent();

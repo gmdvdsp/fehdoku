@@ -2,6 +2,7 @@ import json
 import random
 import math
 import re
+import time
 
 MIN_SOLUTIONS = 1
 STAT_THRESHOLDS = 0
@@ -16,27 +17,10 @@ category_values = {}
 
 
 def get_grid(categories, targets, solutions):
-    grid = {'categories': categories, 'targets': targets, 'solutions': solutions, 'heroes': heroes, 'options': options, 'game': []}
-
-    for i, solution in enumerate(solutions):
-        cell = {'index': i, 'categories': {}, 'solutions': solutions[i]}
-        # todo: refactor
-        if i < 3:
-            category_1 = categories[3]
-            category_2 = categories[i]
-            cell['categories'][category_1] = targets[3]
-            cell['categories'][category_2] = targets[i]
-        if 3 <= i < 6:
-            category_1 = categories[4]
-            category_2 = categories[i - 3]
-            cell['categories'][category_1] = targets[4]
-            cell['categories'][category_2] = targets[i - 3]
-        if 6 <= i < 9:
-            category_1 = categories[5]
-            category_2 = categories[i - 6]
-            cell['categories'][category_1] = targets[5]
-            cell['categories'][category_2] = targets[i - 6]
-        grid['game'].append(cell)
+    grid = {'categories': categories,
+            'targets': targets,
+            'solutions': solutions,
+            'heroes': [{'name': hero['name'], 'image': hero['image']} for hero in heroes]}
     return grid
 
 
@@ -97,7 +81,7 @@ def is_answer(hero, category, target):
         check = handle_threshold(int(target), int(values[0]), int(values[-1]))
     elif category == 'Special Rarity':
         check = handle_special(target, values)
-    elif category == 'Weapons' or category == 'Skills':
+    elif category == 'Weapons' or category == 'Skills' or category == 'Specials':
         check = any(remove_trailing_symbols(target) in value for value in values)
     else:
         check = target in values
@@ -107,7 +91,7 @@ def is_answer(hero, category, target):
 # used to allow for heroes with any version of that skill or weapon
 def remove_trailing_symbols(text):
     if text:
-        return re.sub(r'[^a-zA-Z]+$', '', text)
+        return re.sub(r'[^a-zA-Z)]+$', '', text)
     else:
         return None
 
@@ -136,7 +120,8 @@ def get_potential_grid(categories, targets):
     bottom_mid = get_all_heroes_with_targets(categories[1], targets[1], categories[5], targets[5])
     bottom_right = get_all_heroes_with_targets(categories[2], targets[2], categories[5], targets[5])
 
-    return get_grid(categories, targets, [top_left, top_mid, top_right, left, mid, right, bottom_left, bottom_mid, bottom_right])
+    return get_grid(categories, targets,
+                    [top_left, top_mid, top_right, left, mid, right, bottom_left, bottom_mid, bottom_right])
 
 
 def get_targets(categories):
@@ -149,33 +134,47 @@ def get_targets(categories):
 def get_potential_game(forced_categories):
     if forced_categories is None:
         forced_categories = []
-    categories = []
+    categories = forced_categories
 
-    while not set(forced_categories).issubset(categories):
+    while len(categories) < 6 or len(categories) > len(set(categories)):
+        categories = forced_categories.copy()
         random.seed()
-        categories = random.sample(CATEGORIES, 6)
-    # targets = [random.choice(random.sample(list(category_values[category]), 1)) for category in categories]
+        categories += random.sample(CATEGORIES, 6 - len(forced_categories))
+    # Shuffle it because the forced categories will be at the front.
+    random.shuffle(categories)
     targets = get_targets(categories)
 
     return get_potential_grid(categories, targets)
 
 
-def make_game(forced_categories=None, show=False):
+def make_game(min_solutions, forced_categories=None, show=False, i=None):
+    if show:
+        print(f'Started epoch {i}')
+        start_time = time.perf_counter()
+
     try:
         read_heroes('./heroes_v2.json')
         seed_categories_and_options()
 
-        tries = 0
         while True:
             grid = get_potential_game(forced_categories)
 
-            if all(solution >= MIN_SOLUTIONS for solution in get_solutions_length(grid)):
+            if all(solution >= min_solutions for solution in get_solutions_length(grid)):
                 break
 
-            if show:
-                tries += 1
-                print(tries, get_solutions_length(grid))
+            # if show:
+            #     print([len(solution) for solution in grid['solutions']])
+
+        if show:
+            print(time.perf_counter() - start_time)
 
         return grid
     except OSError:
         pass
+
+
+# if __name__ == "__main__":
+#     n = 5
+#     g = make_game(n=n)
+#     for i in range(n):
+#         print(g[i]['categories'])

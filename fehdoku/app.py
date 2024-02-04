@@ -2,26 +2,33 @@ from flask import Flask, render_template
 import json
 import math
 import grid as g
+import make_games as mg
 
 app = Flask(__name__)
 
 
-# null is a possible JSON value for Special Rarity, which gets converted to python's None,
-# which breaks the frontend since it can't access a None property.
 def preprocess(categories, targets):
     for i, target in enumerate(targets):
         if categories[i] == 'Version':
             version = float(target)
             targets[i] = str(float(math.floor(version)))
+        elif categories[i] == 'Weapon':
+            categories[i] = 'Weapon Type'
         elif categories[i] == 'Weapons' or categories[i] == 'Skills':
             targets[i] = g.remove_trailing_symbols(targets[i])
+        elif categories[i] == 'Entries':
+            categories[i] = 'Entry'
+        elif target == 'New':
+            targets[i] = 'New Mystery of the Emblem'
+        elif target == 'Mystery':
+            targets[i] = 'Mystery of the Emblem'
         elif not target:
             targets[i] = 'Normal Pool'
 
 
 @app.route("/")
 def index():
-    grid = g.make_game(forced_categories=['Skills'], show=True)
+    grid = mg.get_daily_game(days_ahead=0)
     for key, value in grid.items():
         if isinstance(value, set):
             grid[key] = list(value)
