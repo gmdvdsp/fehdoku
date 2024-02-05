@@ -2,7 +2,7 @@ import json
 
 import grid as g
 import os
-import collect_data as writer
+from collect_data import write
 from datetime import datetime, timedelta
 
 FILE_PATH = 'grids.json'
@@ -25,9 +25,8 @@ def get_daily_game(days_ahead=0):
         try:
             with open(FILE_PATH, encoding="utf-8") as f:
                 daily_grids = json.load(f)
-        except Exception as e:
-            print('Failed reading daily grids.')
-    # print(daily_grids)
+        except OSError as e:
+            print(f'Failed reading daily grids: {e}')
 
     current_day = (datetime.now().date() + timedelta(days=days_ahead))
     return daily_grids[current_day.isoformat()]
@@ -36,21 +35,6 @@ def get_daily_game(days_ahead=0):
 def get_difficulty_schedule():
     difficulty_schedule = {0: {'forced_categories': ['Weapons'], 'min_solutions': 1},
                            1: {'forced_categories': ['Weapons'], 'min_solutions': 1}}
-    # day_values = {
-    #     'Monday': {'forced_categories': [], 'min_solutions': 30},
-    #     'Tuesday': {'forced_categories': [], 'min_solutions': 25},
-    #     'Wednesday': {'forced_categories': [], 'min_solutions': 20},
-    #     'Thursday': {'forced_categories': [], 'min_solutions': 10},
-    #     'Friday': {'forced_categories': ['Weapons'], 'min_solutions': 10},
-    #     'Saturday': {'forced_categories': ['Skills'], 'min_solutions': 5},
-    #     'Sunday': {'forced_categories': ['Skills'], 'min_solutions': 1}
-    # }
-    # start_date = datetime.now().date()
-    #
-    # for i in range(n):
-    #     day = start_date + timedelta(days=i)
-    #     difficulty_schedule[i] = {}
-    #     difficulty_schedule[i] = day_values[day.strftime("%A")]
     return difficulty_schedule
 
 
@@ -75,7 +59,4 @@ if __name__ == "__main__":
     except OSError as e:
         pass
 
-    try:
-        writer.write(daily_grids, FILE_PATH, return_json=True)
-    except Exception as e:
-        print(f'Unknown exception: {e}')
+    write(daily_grids, FILE_PATH, return_json=True)

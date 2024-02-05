@@ -32,17 +32,6 @@ body {
     border-bottom: 1px solid #2596be;
 }
 
-#footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    background-color: white;
-    color: black;
-    text-align: center;
-    border-top: 1px solid #2596be;
-}
-
 #chooseGrid {
     display: grid;
     position: absolute;
@@ -169,8 +158,7 @@ body {
     margin: auto;
     z-index: 400;
     opacity: 0;
-    /*FIX THIS LATER*/
-    pointer-events: auto;
+    pointer-events: none;
     transition: opacity 0.5s ease-in-out;
 }
 

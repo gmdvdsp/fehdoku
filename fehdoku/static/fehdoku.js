@@ -62,6 +62,7 @@ function toggleGameOverBoxOn() {
 }
 
 function toggleGameOverBoxOff() {
+    gameOverBox.style.pointerEvents = 'none';
     gameOverBox.style.opacity = '0';
 }
 
@@ -70,6 +71,7 @@ function togglePastGamesBoxOn() {
 }
 
 function togglePastGamesBoxOff() {
+    pastGamesBox.style.pointerEvents = 'none';
     pastGamesBox.style.opacity = '0';
 }
 
@@ -306,7 +308,8 @@ function makeRequest(verb, url) {
     let xhr = new XMLHttpRequest();
     xhr.open(verb, url, false);
     xhr.send();
-    return xhr.response
+    // console.log(xhr.response);
+    return xhr.response;
 }
 
 function handleDailySelection(data) {

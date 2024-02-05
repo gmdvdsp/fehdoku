@@ -38,9 +38,10 @@ def index():
 
     return render_template('fehdoku.html', grid=grid)
 
+
 @app.route("/past-grids", methods=['GET'])
 def past_grids():
-    return mg.get_daily_game(days_ahead=1)
+    return mg.get_daily_game(days_ahead=-1)
 
 
 if __name__ == "__main__":
