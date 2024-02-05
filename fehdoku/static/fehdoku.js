@@ -1,20 +1,17 @@
-// const categoryCellIndexes = [0, 1, 2, 3, 4, 8, 12];
-// import {_} from 'lodash.js';
 const searchInput = document.getElementById('searchInput');
 const searchBar = document.getElementById('searchBar');
 const guessesNumber = document.getElementById('guessesNumber');
-
-const searchResults = document.getElementById('searchResults');
 const gridContainer = document.getElementById('gridContainer');
 
+const searchResults = document.getElementById('searchResults');
+
+const pastGamesBox = document.getElementById('pastGamesBox');
 const gameOverBox = document.getElementById('game-over-box');
 const dimmer = document.getElementById('dimmer');
 
-const categories = grid.categories;
-const targets = grid.targets;
-
 let selectedCell = null;
 let selectedCellIndex = null;
+let selectedGrid = document.getElementById('currentGrid');
 // A list of resultElements for all heroes with images attached.
 // TODO: refactor this into a set for better performance.
 let resultElements = [];
@@ -37,10 +34,12 @@ function toggleDimmerOff() {
 function toggleSearchOn() {
     clearResults();
     searchInput.placeholder = grid['solutions'][selectedCellIndex].length + ' possible solutions...';
+    searchBar.style.visibility = 'visible';
     searchBar.style.opacity = '1';
 }
 
 function toggleSearchOff() {
+    searchBar.style.visibility = 'hidden';
     searchBar.style.opacity = '0';
     toggleSearchResultsOff();
 }
@@ -66,6 +65,14 @@ function toggleGameOverBoxOff() {
     gameOverBox.style.opacity = '0';
 }
 
+function togglePastGamesBoxOn() {
+    pastGamesBox.style.opacity = '1';
+}
+
+function togglePastGamesBoxOff() {
+    pastGamesBox.style.opacity = '0';
+}
+
 function clearResults() {
     searchInput.value = '';
     searchResults.innerHTML = '';
@@ -81,12 +88,6 @@ function makeResultItems() {
 
         // Set the appropriate image.
         resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
-        // grid['images'].forEach(_hero => {
-        //     if (_hero['name'] === name) {
-        //         resultItem.style.backgroundImage = "url(" + _hero['image'] + ")";
-        //         heroObject = _hero;
-        //     }
-        // })
 
         function handleResultClickEvent() {
             searchInput.value = name;
@@ -104,6 +105,7 @@ function addDimEvent() {
         toggleDimmerOff();
         toggleSearchOff();
         toggleGameOverBoxOff();
+        togglePastGamesBoxOff();
     });
 }
 
@@ -162,7 +164,7 @@ function calcMaxScore() {
 }
 
 function calcScore(i) {
-    return 100*(1056 - grid['solutions'][i].length)/1055
+    return 100 * (1056 - grid['solutions'][i].length) / 1055
 }
 
 function calcRarityColor(n) {
@@ -187,9 +189,11 @@ function calcText(score) {
     } else if (26 <= score && score <= 50) {
         return 'NICE!';
     } else if (51 <= score && score <= 75) {
+        return 'DOPE.';
+    } else if (71 <= score && score <= 99) {
         return 'GREAT!';
     } else {
-        return '🐐';
+        return 'YOU THE 🐐.';
     }
 }
 
@@ -209,7 +213,7 @@ function makeGameOverGrid() {
     // Show the score over the max score.
     let scoreValue = document.getElementById('scoreValue');
     let scoreText = document.getElementById('scoreText');
-    let scorePercentage = 100*score/calcMaxScore();
+    let scorePercentage = 100 * score / calcMaxScore();
     // If the number ends with a zero...
     // TODO: Refactor
     if (scorePercentage % 1 === 0) {
@@ -225,6 +229,7 @@ function endGame() {
     toggleDimmerOn();
     makeGameOverGrid();
     toggleGameOverBoxOn();
+    gridContainer.style.pointerEvents = 'none';
 }
 
 function decrementGuesses() {
@@ -287,28 +292,72 @@ function evaluateCorrectness(hero, resultItem) {
 }
 
 function makeCategories() {
-    [1,2,3,4,5,6].forEach(i => {
+    [1, 2, 3, 4, 5, 6].forEach(i => {
         let labelID = 'categoryLabel' + i.toString();
         let valueID = 'categoryValue' + i.toString();
         let categoryLabel = document.getElementById(labelID);
         let categoryValue = document.getElementById(valueID);
         categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
         categoryValue.textContent = grid['targets'][i - 1].toUpperCase();
-        // if (grid['categories'][i-1] === 'Move Type') {
-        //     let img = document.createElement('img');
-        //     img.classList.add('category-image');
-        //     img.src = './static/img/movement/Cavalry.webp';
-        //     categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
-        //     categoryLabel.appendChild(img);
-        // } else {
-        //     categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
-        //     categoryValue.textContent = grid['targets'][i - 1].toUpperCase();
-        // }
     })
+}
+
+function makeRequest(verb, url) {
+    let xhr = new XMLHttpRequest();
+    xhr.open(verb, url, false);
+    xhr.send();
+    return xhr.response
+}
+
+function handleDailySelection(data) {
+    if (guessesLeft === 0) {
+        toggleDimmerOn();
+        toggleGameOverBoxOn();
+    }
+}
+
+function handlePastGridSelection(data) {
+    toggleDimmerOn();
+    togglePastGamesBoxOn();
+    // toggleGameOverBoxOn();
+}
+
+function addGridSelection() {
+    const dailyGrid = document.getElementById('currentGrid');
+    const pastGrids = document.getElementById('pastGrids');
+    selectGrid(dailyGrid);
+
+    function addGridSelectionEvent(grid, otherGrid, url, handleFunction) {
+        grid.addEventListener('click', () => {
+            if (selectedGrid !== grid) {
+                deselectGrid(otherGrid);
+                selectGrid(grid);
+                let data = makeRequest('GET', url);
+                handleFunction(data)
+            }
+        });
+    }
+
+    addGridSelectionEvent(dailyGrid, pastGrids, "/daily", handleDailySelection);
+    addGridSelectionEvent(pastGrids, dailyGrid, "/past-grids", handlePastGridSelection);
+}
+
+function deselectGrid(grid) {
+    const selectedEffect = document.getElementById('selectedGrid');
+    grid.removeChild(selectedEffect);
+}
+
+function selectGrid(grid) {
+    // const currentGrid = document.getElementById('currentGrid');
+    selectedGrid = grid;
+    let selectedEffect = document.createElement('div');
+    selectedEffect.setAttribute("id", "selectedGrid");
+    grid.appendChild(selectedEffect);
 }
 
 // On run:
 guessesNumber.innerText = guessesLeft;
+addGridSelection();
 makeResultItems();
 makeCategories();
 addDimEvent();

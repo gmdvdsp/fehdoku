@@ -1,5 +1,4 @@
 from flask import Flask, render_template
-import json
 import math
 import grid as g
 import make_games as mg
@@ -26,16 +25,22 @@ def preprocess(categories, targets):
             targets[i] = 'Normal Pool'
 
 
-@app.route("/")
+@app.route("/", methods=['GET'])
 def index():
     grid = mg.get_daily_game(days_ahead=0)
+    constants = mg.get_constant_data()
     for key, value in grid.items():
         if isinstance(value, set):
             grid[key] = list(value)
 
     preprocess(grid['categories'], grid['targets'])
+    grid = grid | constants
 
     return render_template('fehdoku.html', grid=grid)
+
+@app.route("/past-grids", methods=['GET'])
+def past_grids():
+    return mg.get_daily_game(days_ahead=1)
 
 
 if __name__ == "__main__":

@@ -7,20 +7,25 @@
     <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     <link rel="icon" type="image/x-icon" href="static/img/favicon.ico">
     <link rel="stylesheet" type="text/css" href="static/fehdoku.css">
-    <title>fehdoku by fyneder</title>
+    <title>FEHnder</title>
 </head>
 <body>
 
 <div id="header">|</div>
 
 <div id="gameWrapper">
+    <div id="chooseGrid">
+        <div class="choose-grid-item" id="currentGrid">Daily</div>
+        <div class="choose-grid-item" id="pastGrids">Past Grids</div>
+    </div>
+
     <div class="search" id="searchBar">
-        <input type="text" id="searchInput" class="searchTerm" placeholder="">
+        <input type="text" id="searchInput" class="searchTerm" placeholder="" autocomplete="off">
         <ul id="searchResults" class="search-results"></ul>
     </div>
 
-    <div id="game-over-box">
-        <div id="game-over-label">
+    <div class="pop-up-box" id="game-over-box">
+        <div class="pop-up-box-label" id="game-over-label">
             SUMMARY
             <div id="game-over-value">FEHDOKU 1</div>
         </div>
@@ -39,6 +44,21 @@
             SCORE
             <div class="score-feedback" id="scoreValue"></div>
             <div class="score-feedback" id="scoreText"></div>
+        </div>
+    </div>
+
+    <div class="pop-up-box" id="pastGamesBox">
+        <div class="pop-up-box-label" id="pastGamesLabel">
+            PAST GAMES
+            <ul id="pastList">
+                <li class="past-games-item" id="pastGames1">#1 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames2">#2 • Feb 5th</li>
+                <li class="past-games-item" id="pastGames3">#3 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames4">#4 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames5">#5 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames6">#6 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames7">#7 • Feb 4th</li>
+            </ul>
         </div>
     </div>
 

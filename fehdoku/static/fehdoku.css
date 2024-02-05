@@ -43,6 +43,39 @@ body {
     border-top: 1px solid #2596be;
 }
 
+#chooseGrid {
+    display: grid;
+    position: absolute;
+    grid-template-columns: repeat(2, 150px);
+    height: 35px;
+    width: fit-content;
+    top: 30px;
+}
+
+.choose-grid-item {
+    display: flex;
+    flex-direction: column;
+    /*border: 1px solid lightgray;*/
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+    font-weight: bold;
+    white-space: pre;
+    background: white;
+    color: black;
+    border-radius: 10px 10px 10px 10px;
+}
+
+#selectedGrid {
+    position: absolute;
+    opacity: 0.5;
+    height: 65%;
+    width: 45%;
+    background-color: pink;
+    border-radius: 10px 10px 10px 10px;
+}
+
 #searchBar {
     display: flex;
     position: relative;
@@ -52,6 +85,7 @@ body {
     transition: opacity 0.5s ease-in-out;
     margin-top: 5%;
     z-index: 300;
+    visibility: hidden;
 }
 
 #searchInput {
@@ -118,7 +152,8 @@ body {
     z-index: 100;
 }
 
-#game-over-box {
+.pop-up-box {
+    display: flex;
     border-radius: 25px;
     width: 350px;
     height: 500px;
@@ -134,16 +169,50 @@ body {
     margin: auto;
     z-index: 400;
     opacity: 0;
-    pointer-events: none;
+    /*FIX THIS LATER*/
+    pointer-events: auto;
     transition: opacity 0.5s ease-in-out;
 }
 
-#game-over-label {
+#pastList {
+    display: flex;
+    width: 15em;
+    flex-direction: column;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.past-games-item {
+    position: relative;
+    /*height: 1.5em;*/
+    width: inherit;
+    color: black;
+    font-weight: lighter;
+    margin-top: 1.5em;
+    border-radius: 10px 10px 10px 10px;
+    background: white url("./img/check.png") no-repeat;
+    background-size: 20px 24px;
+
+}
+
+.past-games-item:hover {
+    background-color: lightgray;
+    opacity: 0.5;
+}
+
+.pop-up-box-label {
     color: black;
     font-size: 20px;
     font-weight: bold;
     position: absolute;
     top: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #game-over-value {
@@ -214,7 +283,7 @@ body {
     width: fit-content;
     row-gap: 1px;
     column-gap: 1px;
-    margin-top: 25%;
+    margin-top: 35%;
 }
 
 #guessesNumber {
@@ -233,7 +302,7 @@ body {
     font-size: 16px;
     position: absolute;
     left: 100%;
-    top: 55%;
+    top: 58.5%;
 }
 
 .row-category {
@@ -257,6 +326,7 @@ body {
     font-size: 16px;
     position: absolute;
     z-index: 150;
+    pointer-events: none;
 }
 
 .category-value {

@@ -6,7 +6,7 @@ import collect_data as writer
 from datetime import datetime, timedelta
 
 FILE_PATH = 'grids.json'
-daily_grids = []
+daily_grids = {}
 
 
 def associate_with_time(grids):
@@ -22,11 +22,15 @@ def associate_with_time(grids):
 def get_daily_game(days_ahead=0):
     global daily_grids
     if not daily_grids:
-        with open(FILE_PATH, encoding="utf-8") as f:
-            daily_grids = json.load(f)
+        try:
+            with open(FILE_PATH, encoding="utf-8") as f:
+                daily_grids = json.load(f)
+        except Exception as e:
+            print('Failed reading daily grids.')
+    # print(daily_grids)
 
-    current_day = (datetime.now().date() + timedelta(days=days_ahead)).isoformat()
-    return daily_grids[current_day]
+    current_day = (datetime.now().date() + timedelta(days=days_ahead))
+    return daily_grids[current_day.isoformat()]
 
 
 def get_difficulty_schedule():
@@ -50,11 +54,14 @@ def get_difficulty_schedule():
     return difficulty_schedule
 
 
+def get_constant_data():
+    return g.get_constants()
+
+
 if __name__ == "__main__":
     grids = []
-    n = 7
+    n = 365
     difficulty_schedule = get_difficulty_schedule()
-    print(difficulty_schedule)
     for i in range(n):
         daily_difficulty = difficulty_schedule[i % 2]
         grids.append(g.make_game(daily_difficulty['min_solutions'],

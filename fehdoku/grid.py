@@ -16,11 +16,19 @@ options = []
 category_values = {}
 
 
+def get_constants():
+    global heroes
+    if not heroes:
+        read_heroes('./heroes_v2.json')
+
+    constants = {'heroes': [{'name': hero['name'], 'image': hero['image']} for hero in heroes]}
+    return constants
+
+
 def get_grid(categories, targets, solutions):
     grid = {'categories': categories,
             'targets': targets,
-            'solutions': solutions,
-            'heroes': [{'name': hero['name'], 'image': hero['image']} for hero in heroes]}
+            'solutions': solutions,}
     return grid
 
 
@@ -134,14 +142,13 @@ def get_targets(categories):
 def get_potential_game(forced_categories):
     if forced_categories is None:
         forced_categories = []
-    categories = forced_categories
+    categories = []
 
-    while len(categories) < 6 or len(categories) > len(set(categories)):
-        categories = forced_categories.copy()
+    while not set(forced_categories).issubset(categories):
         random.seed()
-        categories += random.sample(CATEGORIES, 6 - len(forced_categories))
-    # Shuffle it because the forced categories will be at the front.
-    random.shuffle(categories)
+        random.shuffle(CATEGORIES)
+        categories = CATEGORIES[:6]
+        # print(categories)
     targets = get_targets(categories)
 
     return get_potential_grid(categories, targets)
