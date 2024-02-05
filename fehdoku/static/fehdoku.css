@@ -183,9 +183,13 @@ body {
     margin: 0;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .past-games-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
     /*height: 1.5em;*/
     width: inherit;
@@ -193,8 +197,8 @@ body {
     font-weight: lighter;
     margin-top: 1.5em;
     border-radius: 10px 10px 10px 10px;
-    background: white url("./img/check.png") no-repeat;
-    background-size: 20px 24px;
+    background: white url("./img/check.png") no-repeat 0 50%;
+    background-size: 20px 20px;
 
 }
 
