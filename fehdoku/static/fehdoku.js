@@ -1,3 +1,8 @@
+let grid = game[date]['grid'];
+let guesses = game[date]['guesses'];
+let guessesLeft = game[date]['guessesLeft'];
+let score = game[date]['score'];
+
 const searchInput = document.getElementById('searchInput');
 const searchBar = document.getElementById('searchBar');
 const guessesNumber = document.getElementById('guessesNumber');
@@ -15,11 +20,21 @@ let selectedGrid = document.getElementById('currentGrid');
 // A list of resultElements for all heroes with images attached.
 // TODO: refactor this into a set for better performance.
 let resultElements = [];
-// A 9-element array of sets where each maps to the selectedCellIndex for already chosen heroes.
-let cellCorrectness = Array.from({length: 9})
-    .map(() => ({"correct": new Set(), "incorrect": new Set()}));
-let guessesLeft = 9;
-let score = 0;
+
+function makeRequest(verb, url, data) {
+    let xhr = new XMLHttpRequest();
+    xhr.open(verb, url, false);
+    if (verb === 'GET') {
+        xhr.send();
+        console.log(xhr.response);
+        return xhr.response;
+    } else if (verb === 'POST') {
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(data);
+        console.log(xhr.response);
+        return xhr.response;
+    }
+}
 
 function toggleDimmerOn() {
     dimmer.style.opacity = '0.25';
@@ -68,11 +83,13 @@ function toggleGameOverBoxOff() {
 
 function togglePastGamesBoxOn() {
     pastGamesBox.style.opacity = '1';
+    pastGamesBox.style.pointerEvents = 'auto';
 }
 
 function togglePastGamesBoxOff() {
     pastGamesBox.style.pointerEvents = 'none';
     pastGamesBox.style.opacity = '0';
+    pastGamesBox.style.pointerEvents = 'none';
 }
 
 function clearResults() {
@@ -80,20 +97,42 @@ function clearResults() {
     searchResults.innerHTML = '';
 }
 
+function loadGame() {
+    guesses.forEach(function (cell, i) {
+        // If a correct guess was made for this cell
+        let correct = cell['correct']; let incorrect = cell['incorrect'];
+        if (correct !== null) {
+            let image = grid['heroes'][correct]
+            selectCell(document.getElementById('grid' + (i + 1).toString()), i);
+            selectedCellIndex = i;
+            // REALLY BAD!
+            evaluateCorrectness(correct, image, null)
+        }
+
+        incorrect.forEach(incorrectGuess => {
+            // selectCell(document.getElementById('grid' + (i + 1).toString()), i);
+            selectedCellIndex = i;
+            // REALLY SHIT!
+            console.log(guesses)
+            decrementGuesses();
+        })
+        guessesNumber.innerText = guessesLeft;
+    })
+}
+
 function makeResultItems() {
-    grid['heroes'].forEach(hero => {
+    Object.entries(grid['heroes']).forEach(([name, image]) => {
         // Create a resultItem for every name.
-        let name = hero['name'];
         const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
         resultItem.innerHTML = name;
 
         // Set the appropriate image.
-        resultItem.style.backgroundImage = "url(" + hero['image'] + ")";
+        resultItem.style.backgroundImage = "url(" + image + ")";
 
         function handleResultClickEvent() {
             searchInput.value = name;
-            evaluateCorrectness(hero, resultItem);
+            evaluateCorrectness(name, image, resultItem);
         }
 
         resultItem.addEventListener('click', handleResultClickEvent)
@@ -128,13 +167,13 @@ function addClickableCellEvent() {
 function addSearchEvent() {
     const debounceSearch = _.debounce(searchString => {
         // Reset the search.
-
         searchResults.innerHTML = '';
+
         resultElements.forEach((resultItem => {
-            if (cellCorrectness[selectedCellIndex]['correct'].has(resultItem.innerHTML)) {
-                resultItem.classList.toggle("correct");
-            } else if (cellCorrectness[selectedCellIndex]['incorrect'].has(resultItem.innerHTML)) {
-                resultItem.classList.toggle("incorrect");
+            if (guesses[selectedCellIndex]['correct'] === resultItem.innerHTML) {
+                resultItem.classList.add("correct");
+            } else if (guesses[selectedCellIndex]['incorrect'].includes(resultItem.innerHTML)) {
+                resultItem.classList.add("incorrect");
             } else {
                 resultItem.classList.remove("correct", "incorrect");
             }
@@ -203,8 +242,8 @@ function makeGameOverGrid() {
     let id = null;
 
     // Color all the cells with their correct rarity color.
-    cellCorrectness.forEach((_cell, i) => {
-        if (_cell['correct'].size > 0) {
+    guesses.forEach((cell, i) => {
+        if (cell['correct'] !== null) {
             // A bit nasty.
             id = 'gameOverGrid' + (i + 1).toString(); // forEach i starts at 1.
             let cell = document.getElementById(id);
@@ -244,20 +283,19 @@ function decrementGuesses() {
     }
 }
 
-function evaluateCorrectness(hero, resultItem) {
-    let name = hero['name'];
+function evaluateCorrectness(name, image, resultItem) {
     if (grid['solutions'][selectedCellIndex].includes(name)) {
-        // todo: refactor
+        // TODO: refactor
         const gridLabel = document.createElement('div');
         gridLabel.classList.add('grid-label');
-        gridLabel.innerText = hero['name'].split(':')[0];
+        gridLabel.innerText = name.split(':')[0];
         gridLabel.style.zIndex = "300";
         selectedCell.appendChild(gridLabel);
 
         const blackBox = document.createElement('div');
         blackBox.classList.add('grid-hero-block');
         const cellImage = document.createElement('img');
-        cellImage.src = hero['image'];
+        cellImage.src = image;
         cellImage.style.position = "absolute";
         cellImage.style.height = "150px";
         cellImage.style.width = "150px";
@@ -279,18 +317,18 @@ function evaluateCorrectness(hero, resultItem) {
         toggleSearchOff();
         toggleDimmerOff();
 
+        // TODO: make a request
+        guesses[selectedCellIndex]['correct'] = name
         score += calcScore(selectedCellIndex);
-        cellCorrectness[selectedCellIndex]['correct'].add(name)
-        resultItem.classList.toggle("correct");
-        selectedCell.style.pointerEvents = 'none';
-        console.log('correct');
+        // console.log('correct');
     } else {
-        cellCorrectness[selectedCellIndex]['incorrect'].add(name)
+        // TODO: make a request
+        guesses[selectedCellIndex]['incorrect'].push(name)
         resultItem.classList.toggle("incorrect");
-        console.log('incorrect');
+        // console.log('incorrect');
     }
-    console.log(cellCorrectness)
     decrementGuesses();
+    makeRequest('POST', '/update-game/' + date, JSON.stringify(game))
 }
 
 function makeCategories() {
@@ -302,14 +340,6 @@ function makeCategories() {
         categoryLabel.childNodes[0].textContent = grid['categories'][i - 1].toUpperCase();
         categoryValue.textContent = grid['targets'][i - 1].toUpperCase();
     })
-}
-
-function makeRequest(verb, url) {
-    let xhr = new XMLHttpRequest();
-    xhr.open(verb, url, false);
-    xhr.send();
-    // console.log(xhr.response);
-    return xhr.response;
 }
 
 function handleDailySelection(data) {
@@ -358,8 +388,7 @@ function selectGrid(grid) {
     grid.appendChild(selectedEffect);
 }
 
-// On run:
-guessesNumber.innerText = guessesLeft;
+loadGame();
 addGridSelection();
 makeResultItems();
 makeCategories();

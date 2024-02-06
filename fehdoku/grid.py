@@ -21,14 +21,17 @@ def get_constants():
     if not heroes:
         read_heroes('./heroes_v2.json')
 
-    constants = {'heroes': [{'name': hero['name'], 'image': hero['image']} for hero in heroes]}
+    # Return the minimum information for the frontend: the names and images, keyed by name.
+    constants = {'heroes': {}}
+    for hero in heroes:
+        constants['heroes'][hero['name']] = hero['image']
     return constants
 
 
 def get_grid(categories, targets, solutions):
     grid = {'categories': categories,
             'targets': targets,
-            'solutions': solutions,}
+            'solutions': solutions}
     return grid
 
 

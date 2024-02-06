@@ -1,9 +1,15 @@
-from flask import Flask, render_template
+import json
+import uuid
+from datetime import datetime, timedelta
+
+from flask import Flask, request, render_template, make_response, jsonify
 import math
 import grid as g
 import make_games as mg
 
 app = Flask(__name__)
+
+games = {}
 
 
 def preprocess(categories, targets):
@@ -25,23 +31,67 @@ def preprocess(categories, targets):
             targets[i] = 'Normal Pool'
 
 
+def get_user_daily_game(user_id):
+    # If the game does not exist, make an empty one, or else return that game.
+    today = datetime.now().date().isoformat()
+    try:
+        ret = games[user_id][today]
+        return today, {today: ret}
+    except Exception as e:
+        grid = mg.get_daily_game(days_ahead=0)
+        ret = {today: {'guesses': [{'correct': None, 'incorrect': []} for _ in range(9)],
+                       'grid': grid,
+                       'guessesLeft': 9,
+                       'score': 0}}
+        return today, ret
+
+
 @app.route("/", methods=['GET'])
 def index():
-    grid = mg.get_daily_game(days_ahead=0)
+    # Check if cookies exist.
+    user_id = request.cookies.get('user_id')
+    if user_id is None:
+        user_id = str(uuid.uuid4())
+    if user_id not in games:
+        games[user_id] = {}
+
+    # Get the user's daily game.
+    today, daily_game = get_user_daily_game(user_id)
+    grid = daily_game[today]['grid']
     constants = mg.get_constant_data()
+    daily_game[today]['grid'] = grid | constants
+
     for key, value in grid.items():
         if isinstance(value, set):
             grid[key] = list(value)
 
     preprocess(grid['categories'], grid['targets'])
-    grid = grid | constants
 
-    return render_template('fehdoku.html', grid=grid)
+    print(today)
+    resp = make_response(render_template('fehdoku.html', date=today, game=daily_game))
+    # resp.delete_cookie('user_id')
+    resp.set_cookie('user_id', user_id)
+
+    return resp
 
 
 @app.route("/past-grids", methods=['GET'])
 def past_grids():
-    return mg.get_daily_game(days_ahead=-1)
+    return request.cookies.get('user_id')
+
+
+@app.route("/update-game/<day>", methods=['POST'])
+def update_game(day):
+    # Assumes the user has cookies.
+    user_id = request.cookies.get('user_id')
+    json_data = request.get_json()
+    # print(request.get_json()[day]['guesses'])
+    try:
+        games[user_id][day] = request.get_json()[day]
+    except Exception as e:
+        games[day] = {}
+        games[user_id][day] = json_data
+    return jsonify(success=True)
 
 
 if __name__ == "__main__":

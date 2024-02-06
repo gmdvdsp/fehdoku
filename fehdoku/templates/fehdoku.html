@@ -105,7 +105,8 @@
 </div>
 
 <script type="text/javascript">
-    grid = {{ grid | tojson }}
+    date = {{ date|tojson }}
+    game = {{ game|tojson }}
 </script>
 <script src="{{ url_for('static', filename='lodash.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='fehdoku.js') }}"></script>
