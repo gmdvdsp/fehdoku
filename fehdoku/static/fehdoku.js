@@ -3,20 +3,23 @@ let guesses = game[date]['guesses'];
 let guessesLeft = game[date]['guessesLeft'];
 let score = game[date]['score'];
 
+let selectedGrid = document.getElementById('currentGrid');
+
 const searchInput = document.getElementById('searchInput');
 const searchBar = document.getElementById('searchBar');
-const guessesNumber = document.getElementById('guessesNumber');
-const gridContainer = document.getElementById('gridContainer');
-
 const searchResults = document.getElementById('searchResults');
+
+const gridContainer = document.getElementById('gridContainer');
+const guessesNumber = document.getElementById('guessesNumber');
 
 const pastGamesBox = document.getElementById('pastGamesBox');
 const gameOverBox = document.getElementById('game-over-box');
+
 const dimmer = document.getElementById('dimmer');
 
 let selectedCell = null;
 let selectedCellIndex = null;
-let selectedGrid = document.getElementById('currentGrid');
+
 // A list of resultElements for all heroes with images attached.
 // TODO: refactor this into a set for better performance.
 let resultElements = [];
@@ -105,7 +108,6 @@ function loadGame() {
             let image = grid['heroes'][correct]
             selectCell(document.getElementById('grid' + (i + 1).toString()), i);
             selectedCellIndex = i;
-            // REALLY BAD!
             evaluateCorrectness(correct, image, null)
         }
 
