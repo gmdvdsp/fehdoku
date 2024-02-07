@@ -185,9 +185,9 @@ body {
     font-weight: lighter;
     margin-top: 1.5em;
     border-radius: 10px 10px 10px 10px;
-    background: white url("./img/check.png") no-repeat 0 50%;
+    background: white no-repeat 0 50%;
     background-size: 20px 20px;
-
+    /*url("./img/check.png")*/
 }
 
 .past-games-item:hover {
@@ -340,12 +340,18 @@ body {
     font-size: 16px;
     color: white;
     font-family: 'Lato', sans-serif;
-    z-index: 150;
+    z-index: 250;
     top: 40%;
     text-shadow: -1px -1px 0 black,
     1px -1px 0 black,
     -1px 1px 0 black,
     1px 1px 0 black;
+}
+
+.grid-image {
+    height: 150px;
+    width: 150px;
+    position: absolute;
 }
 
 .grid-item {

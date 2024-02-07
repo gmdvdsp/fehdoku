@@ -2,6 +2,7 @@ let grid = game[date]['grid'];
 let guesses = game[date]['guesses'];
 let guessesLeft = game[date]['guessesLeft'];
 let score = game[date]['score'];
+let heroes = constants['heroes']
 
 let selectedGrid = document.getElementById('currentGrid');
 
@@ -29,14 +30,22 @@ function makeRequest(verb, url, data) {
     xhr.open(verb, url, false);
     if (verb === 'GET') {
         xhr.send();
-        console.log(xhr.response);
+        // console.log(xhr.response);
         return xhr.response;
     } else if (verb === 'POST') {
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(data);
-        console.log(xhr.response);
+        // console.log(xhr.response);
         return xhr.response;
     }
+}
+
+function getClassElement(tag, className) {
+    const element = document.createElement(tag);
+    if (className !== null) {
+        element.classList.add(className);
+    }
+    return element;
 }
 
 function toggleDimmerOn() {
@@ -101,29 +110,23 @@ function clearResults() {
 }
 
 function loadGame() {
+    guessesNumber.innerText = guessesLeft;
     guesses.forEach(function (cell, i) {
-        // If a correct guess was made for this cell
-        let correct = cell['correct']; let incorrect = cell['incorrect'];
+        let correct = cell['correct'];
         if (correct !== null) {
-            let image = grid['heroes'][correct]
+            let image = heroes[correct];
             selectCell(document.getElementById('grid' + (i + 1).toString()), i);
             selectedCellIndex = i;
-            evaluateCorrectness(correct, image, null)
+            handleCorrectGuess(correct, image);
         }
-
-        incorrect.forEach(incorrectGuess => {
-            // selectCell(document.getElementById('grid' + (i + 1).toString()), i);
-            selectedCellIndex = i;
-            // REALLY SHIT!
-            console.log(guesses)
-            decrementGuesses();
-        })
-        guessesNumber.innerText = guessesLeft;
     })
+    if (guessesLeft === 0) {
+        endGame();
+    }
 }
 
 function makeResultItems() {
-    Object.entries(grid['heroes']).forEach(([name, image]) => {
+    Object.entries(heroes).forEach(([name, image]) => {
         // Create a resultItem for every name.
         const resultItem = document.createElement('li');
         resultItem.className = 'result-item';
@@ -269,6 +272,7 @@ function makeGameOverGrid() {
 }
 
 function endGame() {
+    toggleSearchOff();
     toggleDimmerOn();
     makeGameOverGrid();
     toggleGameOverBoxOn();
@@ -280,56 +284,64 @@ function decrementGuesses() {
     guessesNumber.innerText = guessesLeft;
     if (guessesLeft === 0) {
         toggleSearchOff();
-        toggleDimmerOn();
         endGame();
     }
 }
 
+function addCornerRounding(htmlElement, corners) {
+    const cornerClasses = {
+        0: 'top-left',
+        2: 'top-right',
+        6: 'bottom-left',
+        8: 'bottom-right',
+    };
+
+    const borderRounding = cornerClasses[selectedCellIndex];
+    if (corners.includes(borderRounding)) {
+        htmlElement.classList.add(borderRounding);
+    }
+}
+
+function handleCorrectGuess(name, image) {
+    let gridLabel = getClassElement('div', 'grid-label');
+    let blackBox = getClassElement('div', 'grid-hero-block');
+    let cellImage = getClassElement('img', 'grid-image');
+
+    gridLabel.innerText = name.split(':')[0];
+    cellImage.src = image;
+
+    addCornerRounding(blackBox, ['bottom-left', 'bottom-right']);
+    addCornerRounding(cellImage, ['top-left', 'top-right', 'bottom-left', 'bottom-right']);
+
+    selectedCell.appendChild(gridLabel);
+    selectedCell.appendChild(blackBox)
+    selectedCell.appendChild(cellImage);
+    selectedCell.style.pointerEvents = 'none';
+
+    guesses[selectedCellIndex]['correct'] = name
+}
+
+function handleIncorrectGuess(name, resultItem) {
+    guesses[selectedCellIndex]['incorrect'].push(name);
+    resultItem.classList.add("incorrect");
+}
+
 function evaluateCorrectness(name, image, resultItem) {
     if (grid['solutions'][selectedCellIndex].includes(name)) {
-        // TODO: refactor
-        const gridLabel = document.createElement('div');
-        gridLabel.classList.add('grid-label');
-        gridLabel.innerText = name.split(':')[0];
-        gridLabel.style.zIndex = "300";
-        selectedCell.appendChild(gridLabel);
-
-        const blackBox = document.createElement('div');
-        blackBox.classList.add('grid-hero-block');
-        const cellImage = document.createElement('img');
-        cellImage.src = image;
-        cellImage.style.position = "absolute";
-        cellImage.style.height = "150px";
-        cellImage.style.width = "150px";
-        // top left
-        if (selectedCellIndex === 0) {
-            cellImage.classList.add('top-left');
-        } else if (selectedCellIndex === 2) {
-            cellImage.classList.add('top-right');
-        } else if (selectedCellIndex === 6) {
-            cellImage.classList.add('bottom-left');
-            blackBox.classList.add('bottom-left');
-        } else if (selectedCellIndex === 8) {
-            cellImage.classList.add('bottom-right');
-            blackBox.classList.add('bottom-right');
-        }
-        selectedCell.appendChild(blackBox)
-        selectedCell.appendChild(cellImage);
-
+        handleCorrectGuess(name, image)
         toggleSearchOff();
         toggleDimmerOff();
-
-        // TODO: make a request
-        guesses[selectedCellIndex]['correct'] = name
         score += calcScore(selectedCellIndex);
-        // console.log('correct');
     } else {
-        // TODO: make a request
-        guesses[selectedCellIndex]['incorrect'].push(name)
-        resultItem.classList.toggle("incorrect");
-        // console.log('incorrect');
+        // If the user guesses wrong, we also need the result item to change its color.
+        handleIncorrectGuess(name, resultItem);
     }
     decrementGuesses();
+
+    // First, set all the unreferenced variables:
+    game[date]['guessesLeft'] = guessesLeft;
+    game[date]['score'] = score;
+
     makeRequest('POST', '/update-game/' + date, JSON.stringify(game))
 }
 
@@ -344,15 +356,29 @@ function makeCategories() {
     })
 }
 
-function handleDailySelection(data) {
+function handleDailySelection() {
     if (guessesLeft === 0) {
         toggleDimmerOn();
         toggleGameOverBoxOn();
     }
 }
 
-function handlePastGridSelection(data) {
+function makePastGamesBox() {
+    let pastGames = [];
+    pastGames.push(game)
+    // for (let i = 0; i < 6; i++) {
+    //     let game = makeRequest('GET', '/past-grids/' + date + '/' + i, null);
+    //     pastGames.push(game['data']);
+    // }
+    let req = JSON.parse(makeRequest('GET', '/past-grids/' + date + '/' + '1', null));
+    let d = Object.keys(req['data'])[0];
+    console.log(d)
+    console.log(req['data'][d]['guesses']);
+}
+
+function handlePastGridSelection() {
     toggleDimmerOn();
+    makePastGamesBox();
     togglePastGamesBoxOn();
     // toggleGameOverBoxOn();
 }
@@ -362,19 +388,18 @@ function addGridSelection() {
     const pastGrids = document.getElementById('pastGrids');
     selectGrid(dailyGrid);
 
-    function addGridSelectionEvent(grid, otherGrid, url, handleFunction) {
+    function addGridSelectionEvent(grid, otherGrid, handleFunction) {
         grid.addEventListener('click', () => {
             if (selectedGrid !== grid) {
                 deselectGrid(otherGrid);
                 selectGrid(grid);
-                let data = makeRequest('GET', url);
-                handleFunction(data)
+                handleFunction();
             }
         });
     }
 
-    addGridSelectionEvent(dailyGrid, pastGrids, "/daily", handleDailySelection);
-    addGridSelectionEvent(pastGrids, dailyGrid, "/past-grids", handlePastGridSelection);
+    addGridSelectionEvent(dailyGrid, pastGrids, handleDailySelection);
+    addGridSelectionEvent(pastGrids, dailyGrid, handlePastGridSelection);
 }
 
 function deselectGrid(grid) {
@@ -383,7 +408,6 @@ function deselectGrid(grid) {
 }
 
 function selectGrid(grid) {
-    // const currentGrid = document.getElementById('currentGrid');
     selectedGrid = grid;
     let selectedEffect = document.createElement('div');
     selectedEffect.setAttribute("id", "selectedGrid");

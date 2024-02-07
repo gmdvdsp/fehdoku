@@ -107,6 +107,7 @@
 <script type="text/javascript">
     date = {{ date|tojson }}
     game = {{ game|tojson }}
+    constants = {{ constants|tojson }}
 </script>
 <script src="{{ url_for('static', filename='lodash.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='fehdoku.js') }}"></script>
