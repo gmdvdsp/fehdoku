@@ -37,7 +37,6 @@ def download(name, link):
 
 def write(contents, path=FILE_PATH, return_json=True):
     try:
-        print(f'Attempting to write to {path}...')
         with open(path, 'w', encoding="utf-8") as file:
             if return_json:
                 file.write(json.dumps(contents, ensure_ascii=False))
@@ -46,7 +45,7 @@ def write(contents, path=FILE_PATH, return_json=True):
             file.close()
     except Exception as e:
         print(f'Failed to write. REASON: {e}')
-    print('Write successful.')
+        raise
 
 
 def handle_rarities(hero, tr):

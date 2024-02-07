@@ -21,7 +21,7 @@ def get_constants():
     if not heroes:
         read_heroes('./heroes_v2.json')
 
-    # Return the minimum information for the frontend: the names and images, keyed by name.
+    # Return the minimum constant information for the frontend: the names and images, keyed by name.
     constants = {'heroes': {}}
     for hero in heroes:
         constants['heroes'][hero['name']] = hero['image']
@@ -48,7 +48,6 @@ def read_heroes(path):
 
 def seed_categories_and_options(show=False):
     """ Seed all possible values for a grid clue """
-    # bruh
     global options
     options = []
 

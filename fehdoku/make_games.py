@@ -34,7 +34,7 @@ def get_daily_game(days_ahead=0):
 
 def get_difficulty_schedule():
     difficulty_schedule = {0: {'forced_categories': ['Weapons'], 'min_solutions': 1},
-                           1: {'forced_categories': ['Weapons'], 'min_solutions': 1}}
+                           1: {'forced_categories': ['Skills'], 'min_solutions': 1}}
     return difficulty_schedule
 
 
