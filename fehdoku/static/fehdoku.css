@@ -100,6 +100,7 @@ body {
     border-bottom: 1px solid gray;
 
     &:hover {
+        cursor: pointer;
         background-color: gray;
     }
 }
@@ -179,11 +180,11 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    /*height: 1.5em;*/
+    height: 2em;
     width: inherit;
     color: black;
     font-weight: lighter;
-    margin-top: 1.5em;
+    margin-top: 0.5em;
     border-radius: 10px 10px 10px 10px;
     background: white no-repeat 0 50%;
     background-size: 20px 20px;
@@ -191,8 +192,8 @@ body {
 }
 
 .past-games-item:hover {
-    background-color: lightgray;
-    opacity: 0.5;
+    cursor: pointer;
+    background-color: #f1f5f9;
 }
 
 .pop-up-box-label {
@@ -379,6 +380,7 @@ body {
 }
 
 .grid-item:hover {
+    cursor: pointer;
     background-color: #fefce8;
 }
 

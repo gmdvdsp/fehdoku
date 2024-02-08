@@ -51,13 +51,13 @@
         <div class="pop-up-box-label" id="pastGamesLabel">
             PAST GAMES
             <ul id="pastList">
-                <li class="past-games-item" id="pastGames1">#1 • Feb 4th</li>
-                <li class="past-games-item" id="pastGames2">#2 • Feb 5th</li>
-                <li class="past-games-item" id="pastGames3">#3 • Feb 4th</li>
-                <li class="past-games-item" id="pastGames4">#4 • Feb 4th</li>
-                <li class="past-games-item" id="pastGames5">#5 • Feb 4th</li>
-                <li class="past-games-item" id="pastGames6">#6 • Feb 4th</li>
-                <li class="past-games-item" id="pastGames7">#7 • Feb 4th</li>
+                <li class="past-games-item" id="pastGames1"></li>
+                <li class="past-games-item" id="pastGames2"></li>
+                <li class="past-games-item" id="pastGames3"></li>
+                <li class="past-games-item" id="pastGames4"></li>
+                <li class="past-games-item" id="pastGames5"></li>
+                <li class="past-games-item" id="pastGames6"></li>
+                <li class="past-games-item" id="pastGames7"></li>
             </ul>
         </div>
     </div>
@@ -105,9 +105,10 @@
 </div>
 
 <script type="text/javascript">
-    date = {{ date|tojson }}
-    game = {{ game|tojson }}
-    constants = {{ constants|tojson }}
+    let date = {{ date|tojson }}
+    let game = {{ game|tojson }}
+    let constants = {{ constants|tojson }}
+    let initial_date = {{ initial_date|tojson }}
 </script>
 <script src="{{ url_for('static', filename='lodash.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='fehdoku.js') }}"></script>

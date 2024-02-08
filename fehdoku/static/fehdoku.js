@@ -30,12 +30,10 @@ function makeRequest(verb, url, data) {
     xhr.open(verb, url, false);
     if (verb === 'GET') {
         xhr.send();
-        // console.log(xhr.response);
         return xhr.response;
     } else if (verb === 'POST') {
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send(data);
-        // console.log(xhr.response);
         return xhr.response;
     }
 }
@@ -364,16 +362,23 @@ function handleDailySelection() {
 }
 
 function makePastGamesBox() {
-    let pastGames = [];
-    pastGames.push(game)
-    // for (let i = 0; i < 6; i++) {
-    //     let game = makeRequest('GET', '/past-grids/' + date + '/' + i, null);
-    //     pastGames.push(game['data']);
-    // }
-    let req = JSON.parse(makeRequest('GET', '/past-grids/' + date + '/' + '1', null));
-    let d = Object.keys(req['data'])[0];
-    console.log(d)
-    console.log(req['data'][d]['guesses']);
+    // Do the first one manually.
+    let pastGridItem = document.getElementById('pastGames1');
+    pastGridItem.innerText = '#1 • ' + initial_date;
+
+    function handleGridSelectionEvent() {
+        makeRequest('GET', '/show-game/' + initial_date + '/' + date, null)
+    }
+
+    for (let i = 1; i < 6; i++) {
+        let response = JSON.parse(makeRequest('GET', '/past-grids/' + initial_date + '/' + i, null));
+        let pastGridItem = document.getElementById('pastGames' + i);
+        let target_date = response['key']
+        pastGridItem.innerText = '# ' + i + ' • ' + target_date;
+        pastGridItem.addEventListener('click', handleGridSelectionEvent)
+        // let key = response['key']
+        // pastGames.push(response['data']);
+    }
 }
 
 function handlePastGridSelection() {

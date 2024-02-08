@@ -11,7 +11,7 @@ import make_games as mg
 from collect_data import write
 
 app = Flask(__name__)
-app.logger.setLevel(logging.ERROR)
+logging.getLogger('werkzeug').disabled = True
 
 games = {}
 
@@ -60,29 +60,36 @@ def get_user_id():
     return user_id
 
 
-def render_game(user_id, date, game):
+def render_game(user_id, initial_date, date, game):
     constants = mg.get_constant_data()
-    resp = make_response(render_template('fehdoku.html', date=date, game=game, constants=constants))
-    resp.set_cookie('user_id', user_id)
+    resp = make_response(render_template('fehdoku.html',
+                                         initial_date=initial_date,
+                                         date=date,
+                                         game=game,
+                                         constants=constants))
+    resp.set_cookie('user_id', user_id, max_age=31536000)  # One year in seconds.
     return resp
 
 
 def load_database():
-    try:
-        with open(FILE_PATH, encoding="utf-8") as f:
-            global games
-            games = json.load(f)
-            f.close()
-    except OSError:
-        print('No database exists.')
-        pass
+    global games
+    if not games:
+        try:
+            with open(FILE_PATH, encoding="utf-8") as f:
+                games = json.load(f)
+                f.close()
+                print('Database loaded.')
+        except OSError:
+            print('No database exists.')
+            pass
 
 
 @app.route("/", methods=['GET'])
 def index():
-    user_id = get_user_id()
-
+    # If there isn't an in-memory object database yet, go load it from the JSON. Else, leave it alone.
     load_database()
+
+    user_id = get_user_id()
 
     # Get the user's daily game.
     today = datetime.now().date().isoformat()
@@ -95,7 +102,7 @@ def index():
             grid[key] = list(value)
     preprocess(grid['categories'], grid['targets'])
 
-    return render_game(user_id, today, daily_game)
+    return render_game(user_id, today, today, daily_game)
 
 
 @app.route("/dates", methods=['GET'])
@@ -106,13 +113,12 @@ def get_user_dates():
     return jsonify({'success': True, 'data': [date for date in user_games]})
 
 
-@app.route("/show-game/<date>", methods=['GET'])
-def get_game(date):
+@app.route("/show-game/<initial_date>/<date>", methods=['GET'])
+def show_game(initial_date, date):
     user_id = get_user_id()
 
     target_game = get_user_game(user_id, date)
-    return render_game(user_id, date, target_game)
-
+    return render_game(user_id, initial_date, date, target_game)
 
 
 @app.route("/past-grids/<date>/<days_back>", methods=['GET'])
@@ -122,7 +128,7 @@ def get_past_grids(date, days_back):
     today = datetime.fromisoformat(date).date()
     target_day = (today + timedelta(days=int(days_back) * -1)).isoformat()
     target_game = get_user_game(user_id, target_day)
-    print(target_game)
+    # print(target_game)
     return jsonify({'success': True, 'key': target_day, 'data': target_game})
 
 
@@ -146,3 +152,4 @@ if __name__ == "__main__":
             # Silently fails, because this will hit every time the app refreshes.
             pass
         write(games, FILE_PATH, return_json=True)
+        print('Database write finished.')
