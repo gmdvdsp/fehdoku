@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import logging
-from flask import Flask, request, render_template, make_response, jsonify
+from flask import Flask, request, render_template, make_response, jsonify, url_for, redirect
 import math
 import grid as g
 import make_games as mg
@@ -37,6 +37,18 @@ def preprocess(categories, targets):
             targets[i] = 'Normal Pool'
 
 
+def get_constants():
+    constants = mg.get_constant_data()
+    edit_urls(constants)
+    return constants
+
+
+def edit_urls(constants):
+    heroes = constants['heroes']
+    for hero_name, hero_image in heroes.items():
+        heroes[hero_name] = url_for('static', filename=hero_image)
+
+
 def get_user_game(user_id, date):
     try:
         ret = games[user_id][date]
@@ -61,7 +73,7 @@ def get_user_id():
 
 
 def render_game(user_id, initial_date, date, game):
-    constants = mg.get_constant_data()
+    constants = get_constants()
     resp = make_response(render_template('fehdoku.html',
                                          initial_date=initial_date,
                                          date=date,
@@ -84,25 +96,17 @@ def load_database():
             pass
 
 
-@app.route("/", methods=['GET'])
-def index():
-    # If there isn't an in-memory object database yet, go load it from the JSON. Else, leave it alone.
+@app.before_request
+def before_first_request():
     load_database()
 
+
+@app.route("/", methods=['GET'])
+def index():
     user_id = get_user_id()
-
-    # Get the user's daily game.
     today = datetime.now().date().isoformat()
-    daily_game = get_user_game(user_id, today)
 
-    # Preprocess the categories and targets for readability.
-    grid = daily_game[today]['grid']
-    for key, value in grid.items():
-        if isinstance(value, set):
-            grid[key] = list(value)
-    preprocess(grid['categories'], grid['targets'])
-
-    return render_game(user_id, today, today, daily_game)
+    return redirect(f'/game/{today}')
 
 
 @app.route("/dates", methods=['GET'])
@@ -113,12 +117,30 @@ def get_user_dates():
     return jsonify({'success': True, 'data': [date for date in user_games]})
 
 
-@app.route("/show-game/<initial_date>/<date>", methods=['GET'])
-def show_game(initial_date, date):
+@app.route("/choose/<date>", methods=['GET'])
+def get_game(date):
+    return redirect(f'/game/{date}')
+
+
+@app.route("/game/<date>", methods=['GET'])
+def show_game(date):
     user_id = get_user_id()
 
+    # Get the 'root' day, for the past grids selection.
+    today = datetime.now().date().isoformat()
+
     target_game = get_user_game(user_id, date)
-    return render_game(user_id, initial_date, date, target_game)
+    # print(target_game)
+
+    # Preprocess the categories and targets for readability.
+    grid = target_game[date]['grid']
+    for key, value in grid.items():
+        if isinstance(value, set):
+            grid[key] = list(value)
+    preprocess(grid['categories'], grid['targets'])
+
+    print('about to render', date)
+    return render_game(user_id, today, date, target_game)
 
 
 @app.route("/past-grids/<date>/<days_back>", methods=['GET'])
@@ -138,7 +160,7 @@ def update_game(day):
 
     json_data = request.get_json()
     games[user_id][day] = json_data[day]
-    print(games[user_id][day])
+    # print(games[user_id][day])
     return jsonify(success=True)
 
 

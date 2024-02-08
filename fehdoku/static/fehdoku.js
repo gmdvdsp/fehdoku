@@ -366,16 +366,19 @@ function makePastGamesBox() {
     let pastGridItem = document.getElementById('pastGames1');
     pastGridItem.innerText = '#1 • ' + initial_date;
 
-    function handleGridSelectionEvent() {
-        makeRequest('GET', '/show-game/' + initial_date + '/' + date, null)
-    }
-
     for (let i = 1; i < 6; i++) {
         let response = JSON.parse(makeRequest('GET', '/past-grids/' + initial_date + '/' + i, null));
         let pastGridItem = document.getElementById('pastGames' + i);
         let target_date = response['key']
         pastGridItem.innerText = '# ' + i + ' • ' + target_date;
+
+        function handleGridSelectionEvent() {
+            makeRequest('GET', '/choose/' + target_date, null)
+        }
+
         pastGridItem.addEventListener('click', handleGridSelectionEvent)
+
+
         // let key = response['key']
         // pastGames.push(response['data']);
     }

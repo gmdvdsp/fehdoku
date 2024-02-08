@@ -6,7 +6,7 @@ import os
 import re
 
 PREFIX = 'https://feheroes.fandom.com/'
-FILE_PATH = 'heroes_v3.json'
+FILE_PATH = 'heroes_v2.json'
 MAX = 1055
 
 heroes = []
@@ -202,7 +202,7 @@ def parse_image(hero, soup):
                             path = img.get('src').split('/scale-to-width-down')[0]
                             download(name_words, img.get('src').split('/scale-to-width-down')[0])
                             print(path)
-                hero['image'] = f'./static/img/heroes/{name_words}.webp'
+                hero['image'] = f'img/heroes/{name_words}.webp'
         except:
             pass
 
