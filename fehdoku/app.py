@@ -54,7 +54,7 @@ def get_user_game(user_id, date):
         ret = games[user_id][date]
         return {date: ret}
     except KeyError:
-        grid = mg.get_daily_game(days_ahead=0)
+        grid = mg.get_daily_game(date)
         initial_game_state = {'guesses': [{'correct': None, 'incorrect': []} for _ in range(9)],
                               'grid': grid,
                               'guessesLeft': 9,
@@ -74,6 +74,7 @@ def get_user_id():
 
 def render_game(user_id, initial_date, date, game):
     constants = get_constants()
+    # print(initial_date)
     resp = make_response(render_template('fehdoku.html',
                                          initial_date=initial_date,
                                          date=date,
@@ -117,11 +118,6 @@ def get_user_dates():
     return jsonify({'success': True, 'data': [date for date in user_games]})
 
 
-@app.route("/choose/<date>", methods=['GET'])
-def get_game(date):
-    return redirect(f'/game/{date}')
-
-
 @app.route("/game/<date>", methods=['GET'])
 def show_game(date):
     user_id = get_user_id()
@@ -139,7 +135,6 @@ def show_game(date):
             grid[key] = list(value)
     preprocess(grid['categories'], grid['targets'])
 
-    print('about to render', date)
     return render_game(user_id, today, date, target_game)
 
 

@@ -1,8 +1,14 @@
-let grid = game[date]['grid'];
-let guesses = game[date]['guesses'];
-let guessesLeft = game[date]['guessesLeft'];
-let score = game[date]['score'];
-let heroes = constants['heroes']
+// let grid = game[date]['grid'];
+// let guesses = game[date]['guesses'];
+// let guessesLeft = game[date]['guessesLeft'];
+// let score = game[date]['score'];
+// let heroes = constants['heroes'];
+
+let grid = null;
+let guesses = null;
+let guessesLeft = null;
+let score = null;
+let heroes = constants['heroes'];
 
 let selectedGrid = document.getElementById('currentGrid');
 
@@ -20,6 +26,7 @@ const dimmer = document.getElementById('dimmer');
 
 let selectedCell = null;
 let selectedCellIndex = null;
+let selectedGridIndex = 1;
 
 // A list of resultElements for all heroes with images attached.
 // TODO: refactor this into a set for better performance.
@@ -107,13 +114,49 @@ function clearResults() {
     searchResults.innerHTML = '';
 }
 
-function loadGame() {
+function clearCells() {
+    for (let i = 0; i < 9; i++) {
+        let cellElement = document.getElementById('grid' + (i + 1).toString());
+        let children = cellElement.children;
+        let j = children.length - 1;
+        while (j >= 0) {
+            let child = children[j];
+            if (child.classList.contains('grid-image') || child.classList.contains('grid-label') || child.classList.contains('grid-hero-block')) {
+                cellElement.removeChild(child);
+                cellElement.style.pointerEvents = 'auto';
+            }
+            j--;
+        }
+    }
+}
+
+function loadNewGame(newDate, newGame) {
+    game = newGame;
+    date = newDate;
+    grid = newGame[newDate]['grid'];
+    guesses = newGame[newDate]['guesses'];
+    guessesLeft = newGame[newDate]['guessesLeft'];
+    score = newGame[newDate]['score'];
+
+    resultElements = [];
+    clearCells();
+}
+
+function initialize(newDate, newGame) {
+    toggleDimmerOff();
+    togglePastGamesBoxOff();
+
+    loadNewGame(newDate, newGame);
     guessesNumber.innerText = guessesLeft;
+    makeResultItems();
+    makeCategories();
     guesses.forEach(function (cell, i) {
         let correct = cell['correct'];
+        let cellElement = document.getElementById('grid' + (i + 1).toString());
+
         if (correct !== null) {
             let image = heroes[correct];
-            selectCell(document.getElementById('grid' + (i + 1).toString()), i);
+            selectCell(cellElement, i);
             selectedCellIndex = i;
             handleCorrectGuess(correct, image);
         }
@@ -237,7 +280,7 @@ function calcText(score) {
     } else if (71 <= score && score <= 99) {
         return 'GREAT!';
     } else {
-        return 'YOU THE 🐐.';
+        return '🐐';
     }
 }
 
@@ -270,6 +313,7 @@ function makeGameOverGrid() {
 }
 
 function endGame() {
+    console.log('here')
     toggleSearchOff();
     toggleDimmerOn();
     makeGameOverGrid();
@@ -337,10 +381,11 @@ function evaluateCorrectness(name, image, resultItem) {
     decrementGuesses();
 
     // First, set all the unreferenced variables:
+    console.log(game, date)
     game[date]['guessesLeft'] = guessesLeft;
     game[date]['score'] = score;
 
-    makeRequest('POST', '/update-game/' + date, JSON.stringify(game))
+    makeRequest('POST', '/update-game/' + date, JSON.stringify(game));
 }
 
 function makeCategories() {
@@ -362,33 +407,28 @@ function handleDailySelection() {
 }
 
 function makePastGamesBox() {
-    // Do the first one manually.
-    let pastGridItem = document.getElementById('pastGames1');
-    pastGridItem.innerText = '#1 • ' + initial_date;
-
+    makeRequest('POST', '/update-game/' + date, JSON.stringify(game))
     for (let i = 1; i < 6; i++) {
-        let response = JSON.parse(makeRequest('GET', '/past-grids/' + initial_date + '/' + i, null));
+        let response = JSON.parse(makeRequest('GET', '/past-grids/' + initial_date + '/' + (i - 1), null));
         let pastGridItem = document.getElementById('pastGames' + i);
-        let target_date = response['key']
-        pastGridItem.innerText = '# ' + i + ' • ' + target_date;
+        let newDate = response['key']
+        let newGame = response['data']
+        pastGridItem.innerText = '# ' + i + ' • ' + newDate;
 
         function handleGridSelectionEvent() {
-            makeRequest('GET', '/choose/' + target_date, null)
+            if (i !== selectedGridIndex) {
+                selectedGridIndex = i;
+                initialize(newDate, newGame);
+            }
         }
 
         pastGridItem.addEventListener('click', handleGridSelectionEvent)
-
-
-        // let key = response['key']
-        // pastGames.push(response['data']);
     }
 }
 
 function handlePastGridSelection() {
     toggleDimmerOn();
-    makePastGamesBox();
     togglePastGamesBoxOn();
-    // toggleGameOverBoxOn();
 }
 
 function addGridSelection() {
@@ -401,8 +441,8 @@ function addGridSelection() {
             if (selectedGrid !== grid) {
                 deselectGrid(otherGrid);
                 selectGrid(grid);
-                handleFunction();
             }
+            handleFunction();
         });
     }
 
@@ -422,10 +462,9 @@ function selectGrid(grid) {
     grid.appendChild(selectedEffect);
 }
 
-loadGame();
+initialize(date, game);
 addGridSelection();
-makeResultItems();
-makeCategories();
+makePastGamesBox();
 addDimEvent();
 addClickableCellEvent();
 addSearchEvent();

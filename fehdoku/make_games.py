@@ -19,7 +19,7 @@ def associate_with_time(grids):
     return daily_grids
 
 
-def get_daily_game(days_ahead=0):
+def get_daily_game(date):
     global daily_grids
     if not daily_grids:
         try:
@@ -28,8 +28,7 @@ def get_daily_game(days_ahead=0):
         except OSError as e:
             print(f'Failed reading daily grids: {e}')
 
-    current_day = (datetime.now().date() + timedelta(days=days_ahead))
-    return daily_grids[current_day.isoformat()]
+    return daily_grids[date]
 
 
 def get_difficulty_schedule():

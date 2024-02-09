@@ -1,7 +1,9 @@
 High:
-* Implement that so the JS uses and loads in all the given parameters for the 'game' object in the backend.
-* Pass in the 'constants' globally via jinja2 instead of passing it in every 'game' object.
-* Refactor and organize the JS (most importantly the checkCorrectness function)
+* Make "Daily" button a "Score" button instead.
+* Remake the grids.json to keep track of what number the current grid is (i.e fehdoku 1).
+* Find a permanent color scheme for the score.
+* Add emoji copying!
+* Refactor and organize the JS.
 * Implement new algorithm to also allow for ranges for numerical values to allow
   more options.
 * Add a daily hint system (free-summon!)
