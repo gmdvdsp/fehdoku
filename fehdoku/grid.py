@@ -156,6 +156,48 @@ def get_potential_game(forced_categories):
     return get_potential_grid(categories, targets)
 
 
+def is_answerable(grid, min_solutions):
+    """ Brute force backtracking search. """
+    start_time = time.time()
+
+    # Shuffle the solutions so that we don't always get answers close to 'A'
+    for i in range(9):
+        random.shuffle(grid['solutions'][i])
+
+    # lengths = [len(solution) for solution in grid['solutions']]
+    if any(solution < min_solutions for solution in get_solutions_length(grid)):
+        # print(f'Not enough solutions: {lengths}')
+        return False
+
+    already_used = [None for _ in range(9)]
+    index_into_i = [0 for _ in range(9)]
+    i = 0
+    while i < 9:
+        # print(already_used)
+        if index_into_i[i] >= len(grid['solutions'][i]):
+            # print(f'No solution: {[solution for solution in grid['solutions']]}')
+            return False
+
+        for j, solution in enumerate(grid['solutions'][i], start=index_into_i[i]):
+            # This solution works for now.
+            if solution not in already_used:
+                already_used[i] = solution
+                index_into_i[i] = j + 1
+                i += 1
+                break
+        else:
+            # No solution was found that works.
+            already_used[i - 1] = None
+            i -= 1
+
+            if time.time() - start_time > 300:
+                # This code SHOULD never infinitely loop... but we're probably in an infinite loop, just try again.
+                print(f'Timed out with {[solution for solution in grid['solutions']]}')
+                return False
+    print(f'Solution found: {already_used}')
+    return True
+
+
 def make_game(min_solutions, forced_categories=None, show=False, i=None):
     if show:
         print(f'Started epoch {i}')
@@ -168,14 +210,14 @@ def make_game(min_solutions, forced_categories=None, show=False, i=None):
         while True:
             grid = get_potential_game(forced_categories)
 
-            if all(solution >= min_solutions for solution in get_solutions_length(grid)):
+            if is_answerable(grid, min_solutions):
                 break
 
             # if show:
             #     print([len(solution) for solution in grid['solutions']])
 
         if show:
-            print(time.perf_counter() - start_time)
+            print(f'Game generated in {time.perf_counter() - start_time} seconds.')
 
         return grid
     except OSError:
@@ -183,7 +225,6 @@ def make_game(min_solutions, forced_categories=None, show=False, i=None):
 
 
 # if __name__ == "__main__":
-#     n = 5
-#     g = make_game(n=n)
-#     for i in range(n):
-#         print(g[i]['categories'])
+#     g = make_game(1, ['Weapons'])
+#     print(g['solutions'])
+#     print([len(solution) for solution in g['solutions']])

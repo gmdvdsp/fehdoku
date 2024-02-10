@@ -9,9 +9,9 @@ FILE_PATH = 'grids.json'
 daily_grids = {}
 
 
-def associate_with_time(grids):
+def associate_with_time(grids, days_ahead=0):
     daily_grids = {}
-    start_date = datetime.now().date()
+    start_date = datetime.now().date() + timedelta(days=days_ahead)
 
     for i, grid in enumerate(grids):
         day = start_date + timedelta(days=i)
@@ -47,11 +47,13 @@ if __name__ == "__main__":
     difficulty_schedule = get_difficulty_schedule()
     for i in range(n):
         daily_difficulty = difficulty_schedule[i % 2]
-        grids.append(g.make_game(daily_difficulty['min_solutions'],
-                                 forced_categories=daily_difficulty['forced_categories'],
-                                 show=True,
-                                 i=i))
-    daily_grids = associate_with_time(grids)
+        grid = g.make_game(daily_difficulty['min_solutions'],
+                           forced_categories=daily_difficulty['forced_categories'],
+                           show=True,
+                           i=i)
+        grid['id'] = i
+        grids.append(grid)
+    daily_grids = associate_with_time(grids, days_ahead=-7)
 
     try:
         os.remove(FILE_PATH)

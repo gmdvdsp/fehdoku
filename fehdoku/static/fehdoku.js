@@ -256,7 +256,7 @@ function calcScore(i) {
 
 function calcRarityColor(n) {
     if (n === 1) {
-        return 'gold';
+        return '#ffd700';
     } else if (2 <= n && n <= 10) {
         return '#ba81c5';
     } else if (11 <= n && n <= 30) {
@@ -286,6 +286,8 @@ function calcText(score) {
 
 function makeGameOverGrid() {
     let id = null;
+    let gameOverLabel = document.getElementById('game-over-value');
+    gameOverLabel.innerText = 'FEHDOKU ' + grid['id'];
 
     // Color all the cells with their correct rarity color.
     guesses.forEach((cell, i) => {
@@ -408,7 +410,7 @@ function handleDailySelection() {
 
 function makePastGamesBox() {
     makeRequest('POST', '/update-game/' + date, JSON.stringify(game))
-    for (let i = 1; i < 6; i++) {
+    for (let i = 1; i < 8; i++) {
         let response = JSON.parse(makeRequest('GET', '/past-grids/' + initial_date + '/' + (i - 1), null));
         let pastGridItem = document.getElementById('pastGames' + i);
         let newDate = response['key']
