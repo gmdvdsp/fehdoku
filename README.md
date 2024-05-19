@@ -14,7 +14,7 @@ the hero selected for this cell must have the special *Chilling Wind* and the we
 
 ![alt text](https://i.imgur.com/JphnL1W.png)
 
-I'll select it and choose *Yune: Chaos Goddess*.
+I'll select it and type in part of a hero's name; in this case, I want to select *Yune: Chaos Goddess*.
 
 ![alt text](https://i.imgur.com/OejrPGC.png)
 
@@ -23,7 +23,7 @@ Correct!
 ![alt text](https://i.imgur.com/i0iK30f.png)
 
 You get the gist. You have 9 guesses to play each daily game. After, your score will be calculated based off how
-difficult each category was (the fewer options there were, the higher your score!):
+difficult each category was (the fewer possible correct answers there were, the higher your score!):
 
 ![alt text](https://i.imgur.com/QlwiN88.png)
 
